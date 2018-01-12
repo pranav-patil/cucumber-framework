@@ -1,0 +1,10 @@
+{
+  "messages" : [
+    {
+      "messageId": "01",
+      "severity": "success",
+      "messageCode": "CUSTOMER_ADDED",
+      "message" : "Customer is created successfully."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<bean id="siteminderFilter" class="org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter">
+		<property name="principalRequestHeader" value="SM_USER"/>
+		<property name="authenticationManager" ref="testauthenticationManager" />
+	</bean>
+
+	<security:authentication-manager alias="testauthenticationManager">
+		  <security:authentication-provider ref="testProvider" />
+		  <security:authentication-provider>
+		    <security:user-service>
+		      <security:user name="admin" password="adminspassword" authorities="ADMIN" />
+		      <security:user name="user" password="payorspassword" authorities="USER" />
+		    </security:user-service>
+		  </security:authentication-provider>
+	</security:authentication-manager>
+	
+	<bean id="testProvider" class="org.springframework.security.authentication.TestingAuthenticationProvider" />
+
+</beans>

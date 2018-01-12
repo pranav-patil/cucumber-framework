@@ -1,0 +1,16 @@
+.git
+.metadata
+target
+RemoteSystemsTempFiles
+Servers
+**/target
+**/.settings
+*.classpath
+*.project
+*~
+.idea
+.m2/*
+.idea/
+**/MANIFEST.MF
+*.log
+*.iml

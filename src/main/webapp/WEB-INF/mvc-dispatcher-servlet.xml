@@ -1,0 +1,85 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop
+	    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+	<import resource="classpath*:spring.xml" />
+
+	<context:component-scan base-package="com.emprovise" />
+
+	<mvc:annotation-driven />
+	<context:annotation-config/>
+	<mvc:default-servlet-handler />
+
+	<mvc:interceptors>
+		<mvc:interceptor>
+            <mvc:mapping path="/"/>
+            <bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+        </mvc:interceptor>
+	</mvc:interceptors>
+
+	<aop:aspectj-autoproxy />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/pages/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+		<property name="order" value="0" />
+	</bean>
+
+	<bean class="org.springframework.context.support.ResourceBundleMessageSource"
+		id="messageSource">
+		<property name="basename" value="messages" />
+	</bean>
+
+	<!--<bean id="financeProperties" class="org.apache.commons.configuration.PropertiesConfiguration" >-->
+		<!--<constructor-arg type="java.net.URL" value="classpath:application.properties" />-->
+	<!--</bean>-->
+
+	<context:property-placeholder location="classpath:config/application.properties" ignore-unresolvable="true" />
+
+<!--
+	<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+	<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
+
+	<bean id="swaggerResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="classpath:/resources/"/>
+		<property name="suffix" value=".jsp"/>
+		<property name="order" value="1" />
+	</bean>
+
+	<bean id="swagger2Config" class="springfox.documentation.swagger2.configuration.Swagger2DocumentationConfiguration"/>
+	&lt;!&ndash;<bean id="requestMappingHandlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>&ndash;&gt;
+	&lt;!&ndash;<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"/>&ndash;&gt;
+	<bean id="springConfig" class="com.mkyong.common.config.SwaggerConfig"/>
+-->
+
+	<bean id="multipartResolver"   class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- one of the properties available; the maximum file size in bytes -->
+		<property name="maxUploadSize" value="5000000"/>
+	</bean>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver">
+	</bean>
+
+	<!-- selects a static view for rendering without the need for an explicit controller -->
+	<!-- for testing purpose /web/ should show SampleTest page, if spring mvc and spring is configured properly -->
+	<mvc:view-controller path="/" view-name="SampleTest"/>
+
+	<bean id="localeChangeInterceptor"    class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+		<property name="paramName" value="lang" />
+	</bean>
+
+</beans>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd">                  
+
+    <security:http pattern="/info" security='none' />
+    <security:http use-expressions="true" entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
+        <security:custom-filter position="PRE_AUTH_FILTER" ref="siteminderFilter" />
+        <security:csrf disabled="true"/>
+    </security:http>
+
+    <bean id="siteminderFilter" class="org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter">
+        <property name="principalRequestHeader" value="SM_USER"/>
+        <property name="authenticationManager" ref="authenticationManager" />
+    </bean>
+    
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="preauthAuthProvider" />
+    </security:authentication-manager>   
+
+    <bean id="preAuthenticatedProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
+
+    <bean id="preauthAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+    	<property name="preAuthenticatedUserDetailsService">
+    		<bean id="userDetailsServiceWrapper"  class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+    			<property name="userDetailsService" ref="userDetailsService"/>
+    		</bean>
+    	</property>
+    </bean>
+    
+    <bean id="userDetailsService" class="com.emprovise.security.UserDetailsAuthService" />
+
+    <security:global-method-security pre-post-annotations="enabled" proxy-target-class="true" jsr250-annotations="enabled">
+    	<security:expression-handler ref="expressionHandler"/>
+    </security:global-method-security>
+
+    <bean id="expressionHandler" class="com.emprovise.security.CustomMethodSecurityExpressionHandler" >
+        <property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </bean>
+
+ 	<bean id="permissionEvaluator" class="com.emprovise.security.UserPermissionEvaluator"/>
+    
+    <!--<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver" p:defaultErrorView="uncaughtException">
+	    <property name="exceptionMappings">
+	        <props>
+	            <prop key=".RuntimeException">/ErrorPage</prop>
+	        </props>
+	    </property>
+	    <property name="order" value="1"/>
+	</bean>-->
+
+</beans>
