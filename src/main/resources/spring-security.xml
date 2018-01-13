@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <security:global-method-security pre-post-annotations="enabled" proxy-target-class="true" jsr250-annotations="enabled">
+        <security:expression-handler ref="expressionHandler"/>
+    </security:global-method-security>
+
+    <bean id="expressionHandler" class="com.library.security.CustomMethodSecurityExpressionHandler" >
+        <property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </bean>
+
+    <bean id="permissionEvaluator" class="com.library.security.UserPermissionEvaluator"/>
+
+    <security:http use-expressions="true" entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
+        <security:custom-filter position="PRE_AUTH_FILTER" ref="siteminderFilter" />
+        <security:csrf disabled="true"/>
+    </security:http>
+
+    <security:http pattern="/admin/**" use-expressions="true" auto-config="true">
+        <security:intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"/>
+        <security:http-basic entry-point-ref="authenticationEntryPoint" />
+    </security:http>
+
+    <bean id="authenticationEntryPoint"
+          class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
+        <property name="realmName" value="admin realm" />
+    </bean>
+
+    <bean id="loginUrlAuthenticationEntryPoint"
+          class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <constructor-arg name="loginFormUrl" value="/userLogin" />
+    </bean>
+
+    <security:http pattern="/private/**" use-expressions="true" auto-config="true"
+                   entry-point-ref="loginUrlAuthenticationEntryPointWithWarning">
+        <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')"/>
+    </security:http>
+
+    <bean id="loginUrlAuthenticationEntryPointWithWarning"
+          class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <constructor-arg name="loginFormUrl" value="/userLoginWithWarning" />
+    </bean>
+
+    <security:http pattern="/**" use-expressions="true" auto-config="true">
+        <security:intercept-url pattern="/guest/**" access="permitAll()"/>
+    </security:http>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="preauthAuthProvider" />
+    </security:authentication-manager>
+
+    <bean id="siteminderFilter" class="org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter">
+        <property name="principalRequestHeader" value="SM_USER"/>
+        <property name="authenticationManager" ref="authenticationManager" />
+    </bean>
+
+    <bean id="preAuthenticatedProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
+
+    <bean id="preauthAuthProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+    	<property name="preAuthenticatedUserDetailsService">
+    		<bean id="userDetailsServiceWrapper"  class="org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper">
+    			<property name="userDetailsService" ref="userDetailsService"/>
+    		</bean>
+    	</property>
+    </bean>
+
+    <bean id="userDetailsService" class="com.library.security.UserDetailsAuthService" />
+
+</beans>

@@ -1,7 +1,7 @@
 package cukes.steps;
 
-import com.emprovise.response.MessageSeverity;
-import com.emprovise.response.ServiceResponse;
+import com.library.response.MessageSeverity;
+import com.library.response.ServiceResponse;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import cucumber.api.DataTable;
@@ -11,7 +11,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.CoreMatchers;
+import org.junit.matchers.JUnitMatchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -162,7 +162,7 @@ public class HttpSteps extends BaseStepDefinition {
         if (expectedLog.isEmpty()) {
             assertThat(requestLog, isEmptyOrNullString());
         }
-        assertThat(requestLog, CoreMatchers.containsString(expectedLog));
+        assertThat(requestLog, JUnitMatchers.containsString(expectedLog));
     }
 
     private void assertRequestConditions(String jsonResponse, Map<String, String> requestConditions) {

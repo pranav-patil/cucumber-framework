@@ -1,7 +1,7 @@
 package cukes.stub;
 
-import com.emprovise.service.DateService;
-import com.emprovise.service.DateServiceImpl;
+import com.library.service.DateService;
+import com.library.service.DateServiceImpl;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 

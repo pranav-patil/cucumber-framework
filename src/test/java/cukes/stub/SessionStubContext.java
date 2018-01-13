@@ -1,7 +1,7 @@
 package cukes.stub;
 
-import com.emprovise.model.User;
-import com.emprovise.service.SessionContext;
+import com.library.model.User;
+import com.library.service.SessionContext;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;

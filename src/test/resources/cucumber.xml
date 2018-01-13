@@ -6,11 +6,10 @@
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
     <bean id="enterpriseDAO" name="enterpriseDAO" class="org.mockito.Mockito" factory-method="mock">
-        <constructor-arg value="com.emprovise.dao.EnterpriseDAO"/>
+        <constructor-arg value="com.library.dao.EnterpriseDAO"/>
     </bean>
 
-    <import resource="classpath*:spring.xml"/>
-    <import resource="classpath*:test-spring-security.xml" />
+    <import resource="classpath*:spring-configuration.xml"/>
 
     <!-- These lines are to load packages for start up and autowiring -->
     <context:component-scan base-package="cukes.config"/>

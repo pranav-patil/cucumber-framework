@@ -1,7 +1,7 @@
 package cukes.stub;
 
 
-import com.emprovise.dao.ERPServiceAdapter;
+import com.library.dao.ERPServiceAdapter;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.slf4j.Logger;

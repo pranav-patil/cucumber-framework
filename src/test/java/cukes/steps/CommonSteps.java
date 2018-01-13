@@ -1,7 +1,7 @@
 package cukes.steps;
 
-import com.emprovise.datatypes.Role;
-import com.emprovise.service.DateServiceImpl;
+import com.library.datatypes.Role;
+import com.library.service.DateServiceImpl;
 import cucumber.api.Format;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
@@ -9,14 +9,12 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cukes.stub.DateStubService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.TimeZone;
 
 import static cukes.stub.DateStubService.DEFAULT_DATE_FORMAT;
 
-@Service
 public class CommonSteps extends BaseStepDefinition {
 
     private Scenario scenario;

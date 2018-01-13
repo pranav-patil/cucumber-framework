@@ -1,11 +1,13 @@
 package cukes.steps;
 
 
-import com.emprovise.mongodb.Sequence;
+import com.library.mongodb.Sequence;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.UpdateResult;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -35,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class MongoSteps extends BaseStepDefinition {
 
     public static final SimpleDateFormat DEFAULT_DATE_FORMATTER = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-    private static final String[] MONGO_DOMAIN_PACKAGES = {"com.emprovise.mongodb" };
+    private static final String[] MONGO_DOMAIN_PACKAGES = {"com.library.mongodb" };
     @Autowired
     private MongoTemplate mongoTemplate;
     private Map<String, Class<?>> collectionClassMap = new HashMap<>();
@@ -95,17 +97,16 @@ public class MongoSteps extends BaseStepDefinition {
 
         for (Map<String, String> map : dataTableMaps) {
 
-            final BasicDBObject document = new BasicDBObject();
-            document.put("_class", collectionClass.getName());
+            final org.bson.Document document = new org.bson.Document("_class", collectionClass.getName());
             addBasicDBObject(map, document, collectionClass);
 
             mongoTemplate.execute(collectionClass, new CollectionCallback<Object>() {
-                        public Object doInCollection(DBCollection collection) throws MongoException, DataAccessException {
-                            collection.insert(document);
-                            return null;
-                        }
-                    }
-            );
+                @Override
+                public Object doInCollection(MongoCollection<org.bson.Document> mongoCollection) throws MongoException, DataAccessException {
+                    mongoCollection.insertOne(document);
+                    return null;
+                }
+            });
         }
     }
 
@@ -113,10 +114,10 @@ public class MongoSteps extends BaseStepDefinition {
     public void setSequenceCounter(String sequenceName, Long startCounter) throws Throwable {
         Query query = new Query(Criteria.where("name").is(sequenceName));
         Update update = new Update().set("counter", startCounter);
-        WriteResult writeResult = mongoTemplate.upsert(query, update, Sequence.class);
+        UpdateResult updateResult = mongoTemplate.upsert(query, update, Sequence.class);
 
-        if(writeResult.getN() == 0) {
-            throw new RuntimeException(String.format("Sequence Insert/Update failure: %s", writeResult));
+        if(updateResult.getModifiedCount() == 0) {
+            throw new RuntimeException(String.format("Sequence Insert/Update failure: %s", updateResult));
         }
     }
 
@@ -150,7 +151,7 @@ public class MongoSteps extends BaseStepDefinition {
         return collectionClass;
     }
 
-    private void addBasicDBObject(Map<String, String> map, BasicDBObject document, Class<?> collectionClass) {
+    private void addBasicDBObject(Map<String, String> map, org.bson.Document document, Class<?> collectionClass) {
 
         for (Map.Entry<String, String> entry : map.entrySet()) {
 

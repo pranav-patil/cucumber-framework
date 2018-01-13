@@ -1,7 +1,7 @@
 package cukes.steps;
 
-import com.emprovise.response.ResponseMessage;
-import com.emprovise.response.ServiceResponse;
+import com.library.response.ResponseMessage;
+import com.library.response.ServiceResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
