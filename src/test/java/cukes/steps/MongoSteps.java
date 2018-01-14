@@ -156,7 +156,7 @@ public class MongoSteps extends BaseStepDefinition {
         for (Map.Entry<String, String> entry : map.entrySet()) {
 
             String key = entry.getKey();
-            Object value = getObject(collectionClass, entry.getValue(), key);
+            Object value = getObject(collectionClass, key, entry.getValue());
 
             if(key.contains(".")) {
                 String[] tokens = key.split("\\.");

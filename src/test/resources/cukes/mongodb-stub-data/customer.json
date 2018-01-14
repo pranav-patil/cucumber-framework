@@ -1,10 +1,9 @@
 [
   {
-    "_id" : ObjectId("54e1b72c2c03ff25c618dc69"),
-    "_class" : "com.emprovise.mongodb.Customer",
+    "_class" : "com.library.mongodb.Customer",
     "customerId" : "123",
     "name" : "Modi",
-    "age" : "57",
+    "age" : 57,
     "country" : "India",
     "creationDate" : ISODate("2016-04-30T09:49:21.481Z"),
     "lastUpdatedDate" : ISODate("2016-04-30T09:52:23.119Z"),

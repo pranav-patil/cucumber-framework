@@ -22,15 +22,6 @@ public class UserPermissionEvaluator implements PermissionEvaluator {
 	@Override
 	public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object role) {
 
-/*
-        if ((authentication == null) || (targetDomainObject == null) || !(role instanceof String)){
-            return false;
-        }
-
-        String targetType = targetDomainObject.getClass().getSimpleName().toUpperCase();
-
-        return hasPrivilege(authentication, targetType, role.toString().toUpperCase());
-*/
 		UserDetails principal = (UserDetails) authentication.getPrincipal();
         Collection<GrantedAuthority> listofAuthorities = (Collection<GrantedAuthority>) principal.getAuthorities();
 

@@ -68,12 +68,11 @@ public class SessionStubContext implements SessionContext {
         mockUser.setLastName("ABRAMS");
         mockUser.setAddress("123 Some cool street");
         mockUser.setCountry("USA");
-        mockUser.setCurrency("AUD");
-        mockUser.setCountry("Australia");
-        mockUser.setTimeZone(TimeZone.getTimeZone("Australia/Brisbane"));
+        mockUser.setCurrency("USD");
+        mockUser.setTimeZone(TimeZone.getTimeZone("America/Chicago"));
         mockUser.setEmailAddress("JohnAbrams@example.com");
         mockUser.setLocale(Locale.US);
-        mockUser.setRoles(new ArrayList<String>());
+        mockUser.setRoles(new ArrayList<>());
         return mockUser;
     }
 
@@ -88,7 +87,7 @@ public class SessionStubContext implements SessionContext {
     }
 
     public void setFirstName(String firstName) {
-        user.setLastName(firstName);
+        user.setFirstName(firstName);
     }
 
     public void setLastName(String lastName) {
