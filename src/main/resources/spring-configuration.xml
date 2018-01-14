@@ -32,8 +32,8 @@
 		</property>
 	</bean>
 
-	<mongo:mongo-client id="mongo" host="localhost" port="27017" credentials="tuzongxun:123456@mongoTest" />
-	<mongo:db-factory id="mongoDbFactory" dbname="mongodb_test" mongo-ref="mongo"/>
+	<mongo:mongo-client id="mongoClient" host="localhost" port="27017" credentials="tuzongxun:123456@mongoTest" />
+	<mongo:db-factory id="mongoDbFactory" dbname="mongodb_test" mongo-ref="mongoClient"/>
 
 	<!-- MongoTemplate for connecting and quering the documents in the database -->
 	<bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">

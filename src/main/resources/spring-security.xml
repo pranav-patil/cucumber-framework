@@ -11,6 +11,8 @@
         <security:expression-handler ref="expressionHandler"/>
     </security:global-method-security>
 
+    <security:http pattern="/swagger-ui.html" security='none' />
+
     <bean id="expressionHandler" class="com.library.security.CustomMethodSecurityExpressionHandler" >
         <property name="permissionEvaluator" ref="permissionEvaluator"/>
     </bean>
@@ -20,35 +22,6 @@
     <security:http use-expressions="true" entry-point-ref="preAuthenticatedProcessingFilterEntryPoint">
         <security:custom-filter position="PRE_AUTH_FILTER" ref="siteminderFilter" />
         <security:csrf disabled="true"/>
-    </security:http>
-
-    <security:http pattern="/admin/**" use-expressions="true" auto-config="true">
-        <security:intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"/>
-        <security:http-basic entry-point-ref="authenticationEntryPoint" />
-    </security:http>
-
-    <bean id="authenticationEntryPoint"
-          class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
-        <property name="realmName" value="admin realm" />
-    </bean>
-
-    <bean id="loginUrlAuthenticationEntryPoint"
-          class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-        <constructor-arg name="loginFormUrl" value="/userLogin" />
-    </bean>
-
-    <security:http pattern="/private/**" use-expressions="true" auto-config="true"
-                   entry-point-ref="loginUrlAuthenticationEntryPointWithWarning">
-        <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')"/>
-    </security:http>
-
-    <bean id="loginUrlAuthenticationEntryPointWithWarning"
-          class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-        <constructor-arg name="loginFormUrl" value="/userLoginWithWarning" />
-    </bean>
-
-    <security:http pattern="/**" use-expressions="true" auto-config="true">
-        <security:intercept-url pattern="/guest/**" access="permitAll()"/>
     </security:http>
 
     <security:authentication-manager alias="authenticationManager">

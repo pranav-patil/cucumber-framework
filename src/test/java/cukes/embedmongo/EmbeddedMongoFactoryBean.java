@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * This class is a wrapper for {@link EmbeddedMongoBuilder} from this package.
  */
-public class EmbeddedMongoFactoryBean implements FactoryBean<Mongo>, DisposableBean {
+public class EmbeddedMongoFactoryBean implements FactoryBean<MongoClient>, DisposableBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(EmbeddedMongoFactoryBean.class);
 

@@ -8,10 +8,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.UUID;
 public class ServiceExceptionHandler {
 
     @ExceptionHandler({Exception.class})
-    protected Object handleInvalidRequest(Exception exception, WebRequest request) {
+    protected Object handleInvalidRequest(Exception exception) {
 
         Object response;
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -34,6 +34,8 @@ public class ServiceExceptionHandler {
             if (serviceException.getCode() > 300) {
                 httpStatus = HttpStatus.valueOf(serviceException.getCode());
             }
+        } else if(exception instanceof AccessDeniedException) {
+            httpStatus = HttpStatus.UNAUTHORIZED;
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -66,6 +68,8 @@ public class ServiceExceptionHandler {
 
         if (exception instanceof ServiceException) {
             return ((ServiceException) exception).getMessageCode();
+        } else if(exception instanceof AccessDeniedException) {
+            return MessageCode.ACCESS_DENIED;
         }
 
         return MessageCode.UNKNOWN_ERROR;

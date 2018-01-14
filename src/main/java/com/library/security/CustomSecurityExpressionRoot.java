@@ -16,24 +16,23 @@ import java.util.Set;
 
 public class CustomSecurityExpressionRoot extends SecurityExpressionRoot implements MethodSecurityExpressionOperations {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(CustomSecurityExpressionRoot.class);
-
+    /*
+     * Emulating WebSecurityExpressionRoot
+     */
+    private HttpServletRequest request;
     private Object filterObject;
     private Object returnObject;
     private Object target;
     private Set<String> userRoles;
-    /*
-     * This is for emulating WebSecurityExpressionRoot
-     */
-    public HttpServletRequest request;
+    private static Logger LOGGER = LoggerFactory.getLogger(CustomSecurityExpressionRoot.class);
 
-    public CustomSecurityExpressionRoot(Authentication a) {
-        super(a);
+    public CustomSecurityExpressionRoot(Authentication authentication) {
+        super(authentication);
     }
 
-    public CustomSecurityExpressionRoot(Authentication a, FilterInvocation fi) {
-        super(a);
-        this.request = fi.getRequest();
+    public CustomSecurityExpressionRoot(Authentication authentication, FilterInvocation invocation) {
+        super(authentication);
+        this.request = invocation.getRequest();
     }
 
     /**
@@ -79,7 +78,7 @@ public class CustomSecurityExpressionRoot extends SecurityExpressionRoot impleme
     private Set<String> getCustomAuthoritySet() {
 
         if (userRoles == null) {
-            userRoles = new HashSet<String>();
+            userRoles = new HashSet<>();
             Collection<? extends GrantedAuthority> userAuthorities = authentication.getAuthorities();
 
             userRoles = AuthorityUtils.authorityListToSet(userAuthorities);

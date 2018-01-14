@@ -2,6 +2,7 @@ package com.library.response;
 
 public enum MessageCode {
 
+    ACCESS_DENIED("Access Denied, please check your credential and try again."),
     SUCCESS("Request successfully completed."),
     SERVICE_TIMEOUT("service time out"),
     VALIDATION_FAILED("Request is not valid."),

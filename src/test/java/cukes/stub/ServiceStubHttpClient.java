@@ -119,7 +119,8 @@ public class ServiceStubHttpClient {
                 pathKey = "$." + pathKey;
             }
 
-            String requestValue = String.valueOf(JsonPath.read(jsonRequestString, pathKey));
+            Object object = JsonPath.read(jsonRequestString, pathKey);
+            String requestValue = String.valueOf(object);
 
             if(requestValue == null || !requestValue.equals(entry.getValue())) {
                 System.out.println("\n Response matching failed, expected: " + entry.getValue() );

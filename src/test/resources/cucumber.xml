@@ -20,12 +20,7 @@
         <constructor-arg value="org.springframework.web.client.RestTemplate"/>
     </bean>
 
-    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
-        <constructor-arg name="mongo" ref="mongo"/>
-        <constructor-arg name="databaseName" value="embedded"/>
-    </bean>
-
-    <bean id="mongo" class="cukes.embedmongo.EmbeddedMongoFactoryBean">
+    <bean id="mongoClient" class="cukes.embedmongo.EmbeddedMongoFactoryBean">
         <property name="bindIp" value="127.0.0.1"/>
         <property name="port" value="37017"/>
         <property name="defaultImportDatabase" value="embedded"/>

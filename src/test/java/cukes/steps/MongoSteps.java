@@ -116,7 +116,7 @@ public class MongoSteps extends BaseStepDefinition {
         Update update = new Update().set("counter", startCounter);
         UpdateResult updateResult = mongoTemplate.upsert(query, update, Sequence.class);
 
-        if(updateResult.getModifiedCount() == 0) {
+        if(!updateResult.wasAcknowledged() || (updateResult.getModifiedCount() == 0 && updateResult.getUpsertedId() == null)) {
             throw new RuntimeException(String.format("Sequence Insert/Update failure: %s", updateResult));
         }
     }

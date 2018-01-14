@@ -22,17 +22,16 @@ public class UserDetailsAuthService implements AuthenticationUserDetailsService<
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		UserDetails userDetails = null;
-		List<String> listOfBusinessActivities = new ArrayList<String>();
-		listOfBusinessActivities.add("ADMIN");
+		UserDetails userDetails;
+		List<String> listOfBusinessActivities = new ArrayList<>();
+		listOfBusinessActivities.add("ROLE_ADMIN");
+		listOfBusinessActivities.add("ROLE_USER");
 
-		List<GrantedAuthority> listofAuthorities = new ArrayList<GrantedAuthority>();
-		if(listOfBusinessActivities != null && listOfBusinessActivities.size() > 0){
-			for(String businessActivity : listOfBusinessActivities){
-				listofAuthorities.add(new SimpleGrantedAuthority(businessActivity));
-			}
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		for(String businessActivity : listOfBusinessActivities){
+			authorities.add(new SimpleGrantedAuthority(businessActivity));
 		}
-		userDetails = new User(username, "N/A", true, true, true, true, listofAuthorities);
+		userDetails = new User(username, "N/A", true, true, true, true, authorities);
 		return userDetails;
 	}
 }
