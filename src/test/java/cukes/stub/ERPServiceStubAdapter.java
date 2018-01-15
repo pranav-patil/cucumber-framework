@@ -2,6 +2,7 @@ package cukes.stub;
 
 
 import com.library.dao.ERPServiceAdapter;
+import cukes.type.ContentType;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.slf4j.Logger;
@@ -24,16 +25,16 @@ public class ERPServiceStubAdapter extends ERPServiceAdapter {
 
     @Override
     public CloseableHttpResponse get(String serviceUrl) throws IOException {
-        return baseHttpClient.getStubResponse(HttpMethod.GET, serviceUrl, null);
+        return baseHttpClient.getStubResponse(HttpMethod.GET, serviceUrl, ContentType.JSON,null);
     }
 
     @Override
     public CloseableHttpResponse post(StringEntity entity, String serviceUrl) throws IOException {
-        return baseHttpClient.getStubResponse(HttpMethod.POST, serviceUrl, entity);
+        return baseHttpClient.getStubResponse(HttpMethod.POST, serviceUrl, ContentType.JSON, entity);
     }
 
     @Override
     public CloseableHttpResponse put(StringEntity entity, String serviceUrl) throws IOException {
-        return baseHttpClient.getStubResponse(HttpMethod.PUT, serviceUrl, entity);
+        return baseHttpClient.getStubResponse(HttpMethod.PUT, serviceUrl, ContentType.JSON, entity);
     }
 }

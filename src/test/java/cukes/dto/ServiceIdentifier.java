@@ -1,16 +1,20 @@
 package cukes.dto;
 
-import org.apache.commons.lang3.ObjectUtils;
+import cukes.type.ContentType;
 import org.springframework.http.HttpMethod;
+
+import java.util.Objects;
 
 public class ServiceIdentifier {
 
     private HttpMethod httpMethod;
     private String serviceUrl;
+    private ContentType contentType;
 
-    public ServiceIdentifier(HttpMethod httpMethod, String serviceUrl) {
+    public ServiceIdentifier(HttpMethod httpMethod, String serviceUrl, ContentType contentType) {
         this.httpMethod = httpMethod;
         this.serviceUrl = serviceUrl;
+        this.contentType = contentType;
     }
 
     public HttpMethod getHttpMethod() {
@@ -29,6 +33,14 @@ public class ServiceIdentifier {
         this.serviceUrl = serviceUrl;
     }
 
+    public ContentType getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
+    }
+
     @Override
     public boolean equals(Object object) {
 
@@ -41,8 +53,9 @@ public class ServiceIdentifier {
         }
 
         ServiceIdentifier identifier = (ServiceIdentifier) object;
-        return ObjectUtils.equals(identifier.getHttpMethod(), this.httpMethod) &&
-                ObjectUtils.equals(identifier.getServiceUrl(), this.serviceUrl);
+        return Objects.equals(identifier.getHttpMethod(), this.httpMethod) &&
+                Objects.equals(identifier.getServiceUrl(), this.serviceUrl) &&
+                Objects.equals(identifier.getContentType(), this.contentType);
     }
 
     @Override
@@ -56,6 +69,11 @@ public class ServiceIdentifier {
         if (serviceUrl != null) {
             result = 31 * result + serviceUrl.hashCode();
         }
+
+        if (contentType != null) {
+            result = 31 * result + contentType.hashCode();
+        }
+
         return result;
     }
 }

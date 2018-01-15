@@ -6,6 +6,7 @@ import cucumber.api.DataTable;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cukes.stub.ServiceStubHttpClient;
+import cukes.type.ContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -30,70 +31,77 @@ public class ServiceSteps extends BaseStepDefinition {
 
     private static final Pattern SERVICE_PATTERN = Pattern.compile("^/internal/erp/(.*)$");
 
-    @Given("^(GET|PUT|POST) \"(.*?)\" service returns success$")
-    public void serviceSuccessForService(HttpMethod method, String serviceUrl) {
+    @Given("^(GET|PUT|POST) \"(.*?)\" service with (JSON|XML|FORM) request returns success$")
+    public void serviceSuccessForService(HttpMethod method, String serviceUrl, ContentType contentType) {
         serviceUrl = getFullURL(serviceUrl);
         JsonObject response = createResponse("S", "Success");
-        stubBaseHttpClient.setResponseData(method, serviceUrl, HttpStatus.OK, response.toString());
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, HttpStatus.OK, response.toString());
     }
 
-    @Given("^(GET|PUT|POST) \"(.*?)\" service returns success with filename \"(.*?)\"$")
-    public void serviceSuccessWithFileResponseForService(HttpMethod method, String serviceUrl, String filename) throws Exception {
+    @Given("^(GET|PUT|POST) \"(.*?)\" service with (JSON|XML|FORM) request returns success with filename \"(.*?)\"$")
+    public void serviceSuccessWithFileResponseForService(HttpMethod method, String serviceUrl, ContentType contentType, String filename) throws Exception {
         serviceUrl = getFullURL(serviceUrl);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, HttpStatus.OK, getFile(filename));
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, HttpStatus.OK, getFile(filename));
     }
 
-    @Given("^(GET|PUT|POST) \"(.*?)\" service returns success when request matches the values$")
-    public void serviceSuccessForServiceWithRequestCondition(HttpMethod method, String serviceUrl, DataTable conditionTable) {
+    @Given("^(GET|PUT|POST) \"(.*?)\" service returns success when (JSON|XML|FORM) request matches the values$")
+    public void serviceSuccessForServiceWithRequestCondition(HttpMethod method, String serviceUrl, ContentType contentType, DataTable conditionTable) {
         serviceUrl = getFullURL(serviceUrl);
         JsonObject response = createResponse("S", "Success");
-        stubBaseHttpClient.setResponseData(method, serviceUrl, HttpStatus.OK, response.toString(), getMap(conditionTable));
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, HttpStatus.OK, response.toString(), getMap(conditionTable));
     }
 
-    @Given("^(GET|PUT|POST) \"(.*?)\" service returns success with filename \"(.*?)\" when request matches the values$")
-    public void serviceSuccessWithFileResponseForServiceWithRequestCondition(HttpMethod method, String serviceUrl, String filename, DataTable conditionTable) throws Exception {
+    @Given("^(GET|PUT|POST) \"(.*?)\" service returns success with filename \"(.*?)\" when (JSON|XML|FORM) request matches the values$")
+    public void serviceSuccessWithFileResponseForServiceWithRequestCondition(HttpMethod method, String serviceUrl, String filename, ContentType contentType,
+                                                                             DataTable conditionTable) throws Exception {
         serviceUrl = getFullURL(serviceUrl);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, HttpStatus.OK, getFile(filename), getMap(conditionTable));
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, HttpStatus.OK, getFile(filename), getMap(conditionTable));
     }
 
-    @Given("^(GET|PUT|POST) \"(.*?)\" service returns error with http status \"(.*?)\" and filename \"(.*?)\"$")
-    public void serviceErrorWithFileResponseForService(HttpMethod method, String serviceUrl, HttpStatus httpStatus, String filename) throws Exception {
+    @Given("^(GET|PUT|POST) \"(.*?)\" service with (JSON|XML|FORM) request returns error with http status \"(.*?)\" and filename \"(.*?)\"$")
+    public void serviceErrorWithFileResponseForService(HttpMethod method, String serviceUrl, ContentType contentType, HttpStatus httpStatus,
+                                                       String filename) throws Exception {
         serviceUrl = getFullURL(serviceUrl);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, httpStatus, getFile(filename));
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, httpStatus, getFile(filename));
     }
 
-    @Given("^(PUT|POST) \"(.*?)\" service returns error with http status \"(.*?)\" and filename \"(.*?)\" when request matches the values$")
-    public void serviceErrorWithFileResponseForServiceWithRequestCondition(HttpMethod method, String serviceUrl, HttpStatus httpStatus, String filename, DataTable conditionTable) throws Exception {
+    @Given("^(PUT|POST) \"(.*?)\" service returns error with http status \"(.*?)\" and filename \"(.*?)\" when (JSON|XML|FORM) request matches the values$")
+    public void serviceErrorWithFileResponseForServiceWithRequestCondition(HttpMethod method, String serviceUrl, HttpStatus httpStatus, String filename,
+                                                                            ContentType contentType, DataTable conditionTable) throws Exception {
         serviceUrl = getFullURL(serviceUrl);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, httpStatus, getFile(filename), getMap(conditionTable));
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, httpStatus, getFile(filename), getMap(conditionTable));
     }
 
-    @Given("^(GET|PUT|POST) \"(.*?)\" service returns error with http status \"(.*?)\" and having response error code \"(.*?)\" and error message \"(.*?)\"$")
-    public void serviceErrorForService(HttpMethod method, String serviceUrl, HttpStatus httpStatus, String errorCode, String errorDescription) {
-        serviceUrl = getFullURL(serviceUrl);
-        JsonObject response = createErrorResponse(errorCode, errorDescription);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, httpStatus, response.toString());
-    }
-
-    @Given("^(PUT|POST) \"(.*?)\" service returns error with http status \"(.*?)\" and having response error code \"(.*?)\" and error message \"(.*?)\" when request matches the values$")
-    public void serviceErrorForServiceWithRequestCondition(HttpMethod method, String serviceUrl, HttpStatus httpStatus, String errorCode, String errorDescription, DataTable conditionTable) {
+    @Given("^(GET|PUT|POST) \"(.*?)\" service returns error with http status \"(.*?)\" and having (JSON|XML|FORM) response error code \"(.*?)\" and error message \"(.*?)\"$")
+    public void serviceErrorForService(HttpMethod method, String serviceUrl, HttpStatus httpStatus, ContentType contentType,
+                                       String errorCode, String errorDescription) {
         serviceUrl = getFullURL(serviceUrl);
         JsonObject response = createErrorResponse(errorCode, errorDescription);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, httpStatus, response.toString(), getMap(conditionTable));
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, httpStatus, response.toString());
     }
 
-    @Given("^(GET|PUT|POST) \"(.*?)\" service throws exception with http status \"(.*?)\" and having response error code \"(.*?)\" and error message \"(.*?)\"$")
-    public void serviceExceptionForService(HttpMethod method, String serviceUrl, HttpStatus httpStatus, String errorCode, String errorDescription) {
+    @Given("^(PUT|POST) \"(.*?)\" service returns error with http status \"(.*?)\" and having (JSON|XML|FORM) response error code \"(.*?)\" and error message \"(.*?)\" when request matches the values$")
+    public void serviceErrorForServiceWithRequestCondition(HttpMethod method, String serviceUrl, HttpStatus httpStatus, ContentType contentType,
+                                                           String errorCode, String errorDescription, DataTable conditionTable) {
         serviceUrl = getFullURL(serviceUrl);
-        JsonObject response = createExceptionResponse(errorCode, errorDescription);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, httpStatus, response.toString());
+        JsonObject response = createErrorResponse(errorCode, errorDescription);
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, httpStatus, response.toString(), getMap(conditionTable));
     }
 
-    @Given("^(PUT|POST) \"(.*?)\" service throws exception with http status \"(.*?)\" and having response error code \"(.*?)\" and error message \"(.*?)\" when request matches the values$")
-    public void serviceExceptionForServiceWithRequestCondition(HttpMethod method, String serviceUrl, HttpStatus httpStatus, String errorCode, String errorDescription, DataTable conditionTable) {
+    @Given("^(GET|PUT|POST) \"(.*?)\" service throws exception with http status \"(.*?)\" and having (JSON|XML|FORM) response error code \"(.*?)\" and error message \"(.*?)\"$")
+    public void serviceExceptionForService(HttpMethod method, String serviceUrl, HttpStatus httpStatus, ContentType contentType,
+                                           String errorCode, String errorDescription) {
         serviceUrl = getFullURL(serviceUrl);
         JsonObject response = createExceptionResponse(errorCode, errorDescription);
-        stubBaseHttpClient.setResponseData(method, serviceUrl, httpStatus, response.toString(), getMap(conditionTable));
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, httpStatus, response.toString());
+    }
+
+    @Given("^(PUT|POST) \"(.*?)\" service throws exception with http status \"(.*?)\" and having (JSON|XML|FORM) response error code \"(.*?)\" and error message \"(.*?)\" when request matches the values$")
+    public void serviceExceptionForServiceWithRequestCondition(HttpMethod method, String serviceUrl, HttpStatus httpStatus, ContentType contentType,
+                                                               String errorCode, String errorDescription, DataTable conditionTable) {
+        serviceUrl = getFullURL(serviceUrl);
+        JsonObject response = createExceptionResponse(errorCode, errorDescription);
+        stubBaseHttpClient.setResponseData(method, serviceUrl, contentType, httpStatus, response.toString(), getMap(conditionTable));
     }
 
     @Before("@ClearServiceStub")

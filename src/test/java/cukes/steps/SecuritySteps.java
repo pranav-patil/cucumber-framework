@@ -1,6 +1,8 @@
 package cukes.steps;
 
 import cucumber.api.java.en.Given;
+import cukes.stub.SessionStubContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,7 +13,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collections;
 import java.util.List;
 
-public class LoginSteps extends BaseStepDefinition {
+public class SecuritySteps extends BaseStepDefinition {
+
+    @Autowired
+    private SessionStubContext sessionUtility;
 
     @Given("^User \"(.*?)\" login with id \"(.*?)\" and businessActivity \"(.*?)\"$")
     public void login(String userName, String userId, String businessActivity) {

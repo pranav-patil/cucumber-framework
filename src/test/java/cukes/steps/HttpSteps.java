@@ -2,35 +2,32 @@ package cukes.steps;
 
 import com.library.response.MessageSeverity;
 import com.library.response.ServiceResponse;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 import cucumber.api.DataTable;
 import cucumber.api.Scenario;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import cukes.type.ContentType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.matchers.JUnitMatchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.io.File;
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class HttpSteps extends BaseStepDefinition {
 
-    public static final String HTTP_MOCK_REQUEST_PATH = "/cukes/http-service-request/";
-    public static final String HTTP_MOCK_RESPONSE_PATH = "/cukes/http-service-response/";
     private Scenario scenario;
+    private static final String HTTP_MOCK_REQUEST_PATH = "/cukes/http-service-request/";
+    private static final String HTTP_MOCK_RESPONSE_PATH = "/cukes/http-service-response/";
 
     @Before
     public void before(Scenario scenario) {
@@ -44,16 +41,16 @@ public class HttpSteps extends BaseStepDefinition {
         }
     }
 
-    @Given("^HTTP Session has an attribute \"(.*?)\" with class \"(.*?)\" and JSON value$")
-    public void addObjectAttributeToHttpSession(String attributeName, Class<?> clazz, String jsonValue) throws IOException {
-        if(StringUtils.isNotBlank(attributeName) && clazz != null && StringUtils.isNotBlank(jsonValue)) {
-            Object attributeValue = getObject(clazz, jsonValue);
+    @Given("^HTTP Session has an attribute \"(.*?)\" with class \"(.*?)\" and (JSON|XML|FORM) value$")
+    public void addObjectAttributeToHttpSession(String attributeName, Class<?> clazz, ContentType contentType, String contentValue) throws IOException, JAXBException {
+        if(StringUtils.isNotBlank(attributeName) && clazz != null && StringUtils.isNotBlank(contentValue)) {
+            Object attributeValue = contentTypeService.getContentTypeObject(contentType, clazz, contentValue);
             getMockHttpSession().setAttribute(attributeName, attributeValue);
         }
     }
 
     @Given("^HTTP Session does not contain the attribute \"(.*?)\"$")
-    public void removeAttributeFromHttpSession(String attributeName, Class<?> clazz, String jsonValue) throws IOException {
+    public void removeAttributeFromHttpSession(String attributeName) {
         if(StringUtils.isNotBlank(attributeName)) {
             getMockHttpSession().removeAttribute(attributeName);
         }
@@ -76,75 +73,87 @@ public class HttpSteps extends BaseStepDefinition {
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP POST Service is called with URL \"(.*?)\" and JSON request filename \"(.*?)\"$")
-    public void callPOSTServiceWithFilePayload(String serviceUrl, String filename) throws Exception {
-        String requestPayload = getJSONFileString(HTTP_MOCK_REQUEST_PATH + filename);
-        ResultActions resultActions = post(serviceUrl, requestPayload);
+    @When("^HTTP PUT Service URL \"(.*?)\" is called$")
+    public void callPUTService(String serviceUrl) throws Exception {
+        ResultActions resultActions = put(serviceUrl);
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP POST Service is called with URL \"(.*?)\" and JSON request$")
-    public void callPOSTServiceWithRequestPayload(String serviceUrl, String jsonString) throws Exception {
-        ResultActions resultActions = post(serviceUrl, jsonString);
+    @When("^HTTP DELETE Service URL \"(.*?)\" is called$")
+    public void callDELETEService(String serviceUrl) throws Exception {
+        ResultActions resultActions = delete(serviceUrl);
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP POST Service is called with URL \"(.*?)\" and JSON request class \"(.*?)\" having JSON request$")
-    public void callPOSTServiceWithRequestPayloadForClass(String serviceUrl, Class<?> clazz, String jsonString) throws Exception {
-        Object object = getObject(clazz, jsonString);
-        ResultActions resultActions = post(serviceUrl, object);
+    @When("^HTTP POST Service is called with URL \"(.*?)\" and (JSON|XML|FORM) request filename \"(.*?)\"$")
+    public void callPOSTServiceWithFilePayload(String serviceUrl, ContentType contentType, String filename) throws Exception {
+        String requestPayload = getFileContent(contentType,HTTP_MOCK_REQUEST_PATH + filename);
+        ResultActions resultActions = post(serviceUrl, contentType, requestPayload);
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP POST Service is called with URL \"(.*?)\" and JSON request is JSON response from previous service URL \"(.*?)\"$")
-    public void callPOSTServiceWithPreviousResponsePayload(String serviceUrl, String previousServiceUrl) throws Exception {
+    @When("^HTTP POST Service is called with URL \"(.*?)\" and (JSON|XML|FORM) request$")
+    public void callPOSTServiceWithRequestPayload(String serviceUrl, ContentType contentType, String payload) throws Exception {
+        ResultActions resultActions = post(serviceUrl, contentType, payload);
+        setHTTPResult(scenario, resultActions);
+    }
+
+    @When("^HTTP POST Service is called with URL \"(.*?)\" and (JSON|XML|FORM) request class \"(.*?)\" having request$")
+    public void callPOSTServiceWithRequestPayloadForClass(String serviceUrl, ContentType contentType, Class<?> clazz, String payload) throws Exception {
+        Object object = contentTypeService.getContentTypeObject(contentType, clazz, payload);
+        ResultActions resultActions = post(serviceUrl, contentType, object);
+        setHTTPResult(scenario, resultActions);
+    }
+
+    @When("^HTTP POST Service is called with URL \"(.*?)\" and (JSON|XML|FORM) request is response from previous service URL \"(.*?)\"$")
+    public void callPOSTServiceWithPreviousResponsePayload(String serviceUrl, ContentType contentType, String previousServiceUrl) throws Exception {
         ResultActions previousHttpResult = getHTTPResult(scenario, previousServiceUrl);
-        String previousJsonResponse = previousHttpResult.andReturn().getResponse().getContentAsString();
-        ResultActions resultActions = post(serviceUrl, previousJsonResponse);
+        String previousResponse = previousHttpResult.andReturn().getResponse().getContentAsString();
+        ResultActions resultActions = post(serviceUrl, contentType, previousResponse);
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP PUT Service is called with URL \"(.*?)\" and JSON request$")
-    public void callPUTServiceWithRequestPayload(String serviceUrl, String jsonString) throws Exception {
-        ResultActions resultActions = put(serviceUrl, jsonString);
+    @When("^HTTP PUT Service is called with URL \"(.*?)\" and (JSON|XML|FORM) request$")
+    public void callPUTServiceWithRequestPayload(String serviceUrl, ContentType contentType, String payload) throws Exception {
+        ResultActions resultActions = put(serviceUrl, contentType, payload);
         setHTTPResult(scenario, resultActions);
     }
 
     @Then("^Verify HTTP Status equals \"(.*?)\"$")
-    public void thenVerifyHTTPStatusOnly(HttpStatus httpStatus) throws Exception {
+    public void verifyHTTPStatusOnly(HttpStatus httpStatus) throws Exception {
         ResultActions resultActions = getHTTPResult(scenario);
         resultActions.andExpect(status().is(httpStatus.value()));
     }
 
-    @Then("^Verify HTTP Status is \"(.*?)\" and response matches with conditions$")
-    public void thenVerifyResponseWithConditions$(HttpStatus httpStatus, DataTable dataTable) throws Exception {
+    @Then("^Verify HTTP Status is \"(.*?)\" and (JSON|XML|FORM) response matches with conditions$")
+    public void verifyResponseWithConditions$(HttpStatus httpStatus, ContentType contentType, DataTable dataTable) throws Exception {
         ResultActions resultActions = getHTTPResult(scenario);
         MvcResult result = resultActions.andExpect(status().is(httpStatus.value()))
                 .andReturn();
-        String jsonResponse = result.getResponse().getContentAsString();
-        assertRequestConditions(jsonResponse, getMap(dataTable));
+        String responseString = result.getResponse().getContentAsString();
+        contentTypeService.matchContentByConditions(contentType, responseString, getMap(dataTable), true);
     }
 
-    @Then("^Verify HTTP Status is \"(.*?)\" and response matches with JSON filename \"(.*?)\"$")
-    public void thenVerifyResponseWithJSONFile(HttpStatus httpStatus, String filename) throws Exception {
-        String expectedResponse = getJSONFileString(HTTP_MOCK_RESPONSE_PATH + filename);
-        thenVerifyResponseWithJSON(httpStatus, expectedResponse);
+    @Then("^Verify HTTP Status is \"(.*?)\" and response matches with (JSON|XML|FORM) filename \"(.*?)\"$")
+    public void verifyResponseWithFile(HttpStatus httpStatus, ContentType contentType, String filename) throws Exception {
+        String expectedResponse = getFileContent(contentType,HTTP_MOCK_RESPONSE_PATH + filename);
+        verifyResponse(httpStatus, contentType, expectedResponse);
     }
 
-    @Then("^Verify HTTP Status is \"(.*?)\" and response matches with JSON$")
-    public void thenVerifyResponseWithJSON(HttpStatus httpStatus, String expectedJSON) throws Exception {
+    @Then("^Verify HTTP Status is \"(.*?)\" and response matches with (JSON|XML|FORM)$")
+    public void verifyResponse(HttpStatus httpStatus, ContentType contentType, String expectedResponse) throws Exception {
         ResultActions resultActions = getHTTPResult(scenario);
         MvcResult result = resultActions.andExpect(status().is(httpStatus.value())).andReturn();
-        String jsonResponse = result.getResponse().getContentAsString();
-        assertJSONStrings(expectedJSON, jsonResponse);
+        String actualResponse = result.getResponse().getContentAsString();
+        contentTypeService.assertContentByType(contentType, expectedResponse, actualResponse);
     }
 
-    @Then("^Verify HTTP Status is \"(.*?)\" and service response contains message severity \"(.*?)\" and message \"(.*?)\"$")
-    public void thenVerifyResponseWithJSON(HttpStatus httpStatus, MessageSeverity severity, String message) throws Exception {
+    @Then("^Verify HTTP Status is \"(.*?)\" and (JSON|XML|FORM) response contains message severity \"(.*?)\" and message \"(.*?)\"$")
+    public void verifyResponse(HttpStatus httpStatus, ContentType contentType, MessageSeverity severity, String message) throws Exception {
         ResultActions resultActions = getHTTPResult(scenario);
         MvcResult result = resultActions.andExpect(status().is(httpStatus.value())).andReturn();
-        String jsonResponse = result.getResponse().getContentAsString();
-        ServiceResponse serviceResponse = getObject(ServiceResponse.class, jsonResponse);
+        String responseString = result.getResponse().getContentAsString();
+        ServiceResponse serviceResponse = contentTypeService.getContentTypeObject(contentType, ServiceResponse.class, responseString);
 
         if( message.equalsIgnoreCase("") && (severity == null) ) {
             assertTrue("Not empty: " + serviceResponse.getMessages().toString(),serviceResponse.getMessages().isEmpty());
@@ -157,47 +166,11 @@ public class HttpSteps extends BaseStepDefinition {
     }
 
     @Then("^Verify that the application log contains \"(.*?)\"$")
-    public void thenVerifyLogContains(String expectedLog) throws Exception {
+    public void verifyLogContains(String expectedLog) throws Exception {
         String requestLog = getRequestLog();
         if (expectedLog.isEmpty()) {
             assertThat(requestLog, isEmptyOrNullString());
         }
         assertThat(requestLog, JUnitMatchers.containsString(expectedLog));
-    }
-
-    private void assertRequestConditions(String jsonResponse, Map<String, String> requestConditions) {
-
-        if(jsonResponse == null || requestConditions == null) {
-            return;
-        }
-
-        DocumentContext documentContext = JsonPath.parse(jsonResponse);
-
-        for (Map.Entry<String, String> entry : requestConditions.entrySet()) {
-
-            String pathKey = entry.getKey();
-
-            if(StringUtils.isBlank(pathKey)) {
-                continue;
-            }
-
-            pathKey = pathKey.trim();
-
-            if(!pathKey.startsWith("$.")) {
-                pathKey = "$." + pathKey;
-            }
-
-            String actualValue = String.valueOf(documentContext.read(pathKey));
-            assertEquals(entry.getValue(), actualValue);
-        }
-    }
-
-    private String getJSONFileString(String filename) throws URISyntaxException, IOException {
-        if(filename != null && !filename.endsWith(".json")) {
-            filename = filename + ".json";
-        }
-
-        URL resource = this.getClass().getResource(filename);
-        return getFileString(new File(resource.toURI()));
     }
 }

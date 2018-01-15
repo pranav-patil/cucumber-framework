@@ -1,4 +1,4 @@
-package com.library.mongodb;
+package com.library.mongodb.domain;
 
 import org.springframework.data.annotation.Id;
 

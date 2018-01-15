@@ -1,6 +1,6 @@
-package com.library.dao;
+package com.library.mongodb.dao;
 
-import com.library.mongodb.Sequence;
+import com.library.mongodb.domain.Sequence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;

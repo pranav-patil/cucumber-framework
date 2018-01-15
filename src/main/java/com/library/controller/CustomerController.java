@@ -1,8 +1,8 @@
 package com.library.controller;
 
-import com.library.dao.CustomerMongoDAO;
+import com.library.mongodb.dao.CustomerDAO;
 import com.library.dao.ERPServiceAdapter;
-import com.library.dao.SequenceDAO;
+import com.library.mongodb.dao.SequenceDAO;
 import com.library.domain.CustomerRequest;
 import com.library.domain.CustomerResponse;
 import com.library.model.Customer;
@@ -25,7 +25,7 @@ public class CustomerController {
 	@Autowired
 	private ERPServiceAdapter erpServiceAdapter;
 	@Autowired
-	private CustomerMongoDAO customerMongoDAO;
+	private CustomerDAO customerDAO;
 	@Autowired
 	private SequenceDAO sequenceDAO;
 	@Autowired
@@ -40,14 +40,14 @@ public class CustomerController {
 	public ServiceResponse addCustomer(@RequestBody Customer customer) throws Exception {
 		ServiceResponse serviceResponse = new ServiceResponse();
 
-		com.library.mongodb.Customer customerDomain = dozerBeanMapper.map(customer, com.library.mongodb.Customer.class);
+		com.library.mongodb.domain.Customer customerDomain = dozerBeanMapper.map(customer, com.library.mongodb.domain.Customer.class);
 		Long customerId = sequenceDAO.getNextSequence("CustomerSeq", 1L);
 		customerDomain.setCustomerId(customerId.toString());
 		customerDomain.setLocked(false);
 		customerDomain.setCreationDate(new Date());
 		customerDomain.setLastUpdatedDate(new Date());
 		customerDomain.setCountry("USA");
-		customerMongoDAO.save(customerDomain);
+		customerDAO.save(customerDomain);
 
 		CustomerRequest customerRequest = new CustomerRequest();
 		customerRequest.setCustomerId(customerId.toString());
@@ -70,7 +70,7 @@ public class CustomerController {
 	@ResponseBody
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public CustomerDetailsResponse getCustomer(@PathVariable("customerId") String customerId) {
-		com.library.mongodb.Customer customerDomain = customerMongoDAO.findById(Long.valueOf(customerId));
+		com.library.mongodb.domain.Customer customerDomain = customerDAO.findById(Long.valueOf(customerId));
 		Customer customer = dozerBeanMapper.map(customerDomain, Customer.class);
 		CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
 		customerDetailsResponse.setCustomer(customer);

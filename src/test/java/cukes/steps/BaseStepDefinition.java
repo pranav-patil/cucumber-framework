@@ -2,20 +2,15 @@ package cukes.steps;
 
 import com.library.response.ResponseMessage;
 import com.library.response.ServiceResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.DataTable;
 import cucumber.api.Scenario;
 import cukes.config.LogbackCapture;
 import cukes.config.MvcContext;
 import cukes.config.MvcFilter;
-import cukes.stub.SessionStubContext;
-import org.json.JSONException;
+import cukes.helper.ContentTypeService;
+import cukes.type.ContentType;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.runner.RunWith;
-import org.skyscreamer.jsonassert.JSONCompare;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -27,6 +22,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -35,6 +31,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,9 +48,6 @@ import java.util.logging.Logger;
 @WithMockUser(username = "admin", authorities = { "ADMIN", "USER" })
 public class BaseStepDefinition {
 
-    protected static final Logger LOGGER = Logger.getLogger(RunCukesTest.class.getName());
-    @Autowired
-    protected SessionStubContext sessionUtility;
     @Autowired
     private WebApplicationContext webApplicationContext;
     @Autowired
@@ -62,9 +56,12 @@ public class BaseStepDefinition {
     private MvcContext mvcContext;
     @Autowired
     private LogbackCapture logbackCapture;
+    @Autowired
+    protected ContentTypeService contentTypeService;
 
     private MockMvc mockMvc;
     private MockHttpSession mockSession;
+    protected static final Logger logger = Logger.getLogger(RunCukesTest.class.getName());
 
     @PostConstruct
     public void setup() {
@@ -93,46 +90,62 @@ public class BaseStepDefinition {
 
     public ResultActions post(String url) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.post(url)
-                                       .contentType(MediaType.APPLICATION_JSON)
-                                       .session(mockSession));
+                                        .session(mockSession));
     }
 
-    public ResultActions post(String url, String request) throws Exception {
+    public ResultActions post(String url, ContentType contentType, Object object) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .session(mockSession)
-                .content(request));
-    }
-
-    public ResultActions put(String url, String request) throws Exception {
-        return mockMvc.perform(MockMvcRequestBuilders.put(url)
-                                       .contentType(MediaType.APPLICATION_JSON)
-                                       .session(mockSession)
-                                       .content(request));
-    }
-
-    public ResultActions post(String url, Object object) throws Exception {
-        return mockMvc.perform(MockMvcRequestBuilders.post(url)
-                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .contentType(contentType.mediaType())
                                                         .session(mockSession)
-                                                        .content(getJSONString(object)));
+                                                        .content(contentTypeService.getContentTypeString(contentType, object)));
     }
 
-    public String getJSONString(Object object) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(object);
+    public ResultActions post(String url, ContentType contentType, String request) throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(url)
+                                                        .contentType(contentType.mediaType())
+                                                        .session(mockSession);
+
+        if(contentType == ContentType.FORM && !StringUtils.isBlank(request)) {
+            Map<String, String> parameters = contentTypeService.getParameters(request);
+
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                requestBuilder = requestBuilder.param(entry.getKey(), entry.getValue());
+            }
+        } else {
+            requestBuilder = requestBuilder.content(request);
+        }
+
+        return mockMvc.perform(requestBuilder);
     }
 
-    public String getFileString(File file) throws URISyntaxException, IOException {
-
-        byte[] encoded = Files.readAllBytes(Paths.get(file.getPath()));
-        return new String(encoded, Charset.defaultCharset());
+    public ResultActions put(String url) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders.put(url)
+                        .session(mockSession));
     }
 
-    public <T> T getObject(Class<T> clazz, String jsonString) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return objectMapper.readValue(jsonString, clazz);
+    public ResultActions put(String url, ContentType contentType, String request) throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(url)
+                .contentType(contentType.mediaType())
+                .session(mockSession);
+
+        if(contentType == ContentType.FORM && !StringUtils.isBlank(request)) {
+            Map<String, String> parameters = contentTypeService.getParameters(request);
+
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
+                requestBuilder = requestBuilder.param(entry.getKey(), entry.getValue());
+            }
+        } else {
+            requestBuilder = requestBuilder.content(request);
+        }
+
+        return mockMvc.perform(requestBuilder.content(request));
+    }
+
+    public ResultActions delete(String url) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders.delete(url)
+                        .session(mockSession));
     }
 
     public Map<String, String> getMap(DataTable dataTable) {
@@ -145,13 +158,21 @@ public class BaseStepDefinition {
         return finalMap;
     }
 
-    public void assertJSONStrings(String expectedJSON, String actualJSON) throws JSONException {
-        JSONCompareResult result = JSONCompare.compareJSON(expectedJSON, actualJSON, JSONCompareMode.LENIENT);
-        if(result.failed()) {
-            System.out.println("act json: " + actualJSON);
-            System.out.println("expected json: " + expectedJSON);
-            throw new AssertionError(result.getMessage());
+    public String getFileContent(File file) throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(file.getPath()));
+        return new String(encoded, Charset.defaultCharset());
+    }
+
+    public String getFileContent(ContentType contentType, String filename) throws URISyntaxException, IOException {
+
+        String extension = "." + contentType.extension();
+
+        if(filename != null && !filename.endsWith(extension)) {
+            filename = filename + extension;
         }
+
+        URL resource = this.getClass().getResource(filename);
+        return getFileContent(new File(resource.toURI()));
     }
 
     public MockMvc getMockMvc() {
@@ -181,7 +202,8 @@ public class BaseStepDefinition {
     public <T> T getHTTPResultObject(ResultActions resultActions, Class<T> clazz) throws Exception {
         if(resultActions != null) {
             MvcResult result = resultActions.andReturn();
-            return getObject(clazz, result.getResponse().getContentAsString());
+            ContentType contentType = ContentType.getContentType(result.getResponse().getContentType());
+            return contentTypeService.getContentTypeObject(contentType, clazz, result.getResponse().getContentAsString());
         }
         return null;
     }

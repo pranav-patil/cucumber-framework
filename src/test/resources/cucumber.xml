@@ -15,6 +15,7 @@
     <context:component-scan base-package="cukes.config"/>
     <context:component-scan base-package="cukes.stub"/>
     <context:component-scan base-package="cukes.steps"/>
+    <context:component-scan base-package="cukes.helper"/>
 
     <bean id="internalRestTemplate" name="internalRestTemplate" class="org.mockito.Mockito" factory-method="mock">
         <constructor-arg value="org.springframework.web.client.RestTemplate"/>
@@ -40,4 +41,17 @@
             </map>
         </property>
     </bean>
+
+    <bean id="configurationManager" class="com.mockrunner.jms.ConfigurationManager"/>
+    <bean id="destinationManager" class="com.mockrunner.jms.DestinationManager"/>
+
+    <bean id="connectionFactory" class="com.mockrunner.mock.jms.MockQueueConnectionFactory">
+        <constructor-arg index="0" ref="destinationManager"/>
+        <constructor-arg index="1" ref="configurationManager"/>
+    </bean>
+
+    <bean id="messageDestination" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="demoMockRunnerQueue"/>
+    </bean>
+
 </beans>

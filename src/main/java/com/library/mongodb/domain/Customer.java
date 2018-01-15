@@ -1,4 +1,4 @@
-package com.library.mongodb;
+package com.library.mongodb.domain;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;

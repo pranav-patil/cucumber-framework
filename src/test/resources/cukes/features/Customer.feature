@@ -7,7 +7,7 @@ Feature: Add a new customer and get the customer details.
     Given current date is "2016-08-13T12:08:56.235-0600"
 
   Scenario: Add a new customer details
-    Given POST "/internal/erp/addCustomer" service returns success when request matches the values
+    Given POST "/internal/erp/addCustomer" service returns success when JSON request matches the values
       | customerId | customerName   |
       | 2          | John Dillinger |
     And MongoDB sequence "CustomerSeq" has counter 1

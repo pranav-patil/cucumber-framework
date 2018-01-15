@@ -1,6 +1,6 @@
-package com.library.dao;
+package com.library.mongodb.dao;
 
-import com.library.mongodb.Customer;
+import com.library.mongodb.domain.Customer;
 import com.mongodb.WriteConcern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -13,7 +13,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Repository
-public class CustomerMongoDAO {
+public class CustomerDAO {
 
     @Autowired
     private MongoTemplate mongoTemplate;
