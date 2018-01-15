@@ -7,16 +7,20 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import cukes.type.ContentType;
 import org.apache.commons.lang3.StringUtils;
-import org.custommonkey.xmlunit.*;
 import org.json.JSONException;
+import org.junit.Assert;
 import org.skyscreamer.jsonassert.JSONCompare;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONCompareResult;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -51,17 +55,13 @@ public class ContentTypeService {
         return parameters;
     }
 
-    public void assertContentByType(ContentType contentType, String expectedContent, String actualContent) {
+    public void assertContentByType(ContentType contentType, String expectedContent, String actualContent) throws JSONException {
 
-        try {
-            if(contentType == ContentType.JSON) {
-                assertJSON(expectedContent, actualContent);
-            }
-            else if(contentType == ContentType.XML) {
-                assertXML(expectedContent, actualContent);
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+        if(contentType == ContentType.JSON) {
+            assertJSON(expectedContent, actualContent);
+        }
+        else if(contentType == ContentType.XML) {
+            assertXML(expectedContent, actualContent);
         }
     }
 
@@ -74,37 +74,19 @@ public class ContentTypeService {
         }
     }
 
-    private void assertXML(String expectedXML, String actualXML) throws IOException, SAXException {
-        XMLUnit.setIgnoreComments(Boolean.TRUE);
-        XMLUnit.setIgnoreWhitespace(Boolean.TRUE);
-        XMLUnit.setNormalizeWhitespace(Boolean.TRUE);
-        XMLUnit.setIgnoreDiffBetweenTextAndCDATA(Boolean.TRUE);
-        XMLUnit.setIgnoreAttributeOrder(Boolean.TRUE);
-        XMLUnit.setCompareUnmatched(Boolean.FALSE);
-
-        DetailedDiff detailedDiff = new DetailedDiff(XMLUnit.compareXML(expectedXML, actualXML));
-        detailedDiff.overrideDifferenceListener(new DifferenceListener() {
-
-            @Override
-            public void skippedComparison(Node node1, Node node2) { /* skip comparison */ }
-
-            @Override
-            public int differenceFound(Difference difference) {
-                if (difference.getId() == DifferenceConstants.CHILD_NODELIST_SEQUENCE_ID) {
-                    return RETURN_IGNORE_DIFFERENCE_NODES_IDENTICAL;
-                }
-                return RETURN_ACCEPT_DIFFERENCE;
-            }
-        });
-
-        if(!detailedDiff.similar()) {
-            StringBuilder builder = new StringBuilder();
-
-            for (Object object : detailedDiff.getAllDifferences()) {
-                builder.append(object.toString()).append("\n");
-            }
-            throw new RuntimeException(builder.toString());
-        }
+    private void assertXML(String expectedXML, String actualXML) {
+        Diff xmlDiff = DiffBuilder.compare(Input.fromString(expectedXML))
+                                .withTest(Input.fromString(actualXML))
+                                .checkForSimilar()
+                                .ignoreComments()
+                                .ignoreWhitespace()
+                                .normalizeWhitespace()
+                                .withNodeMatcher(
+                                    new DefaultNodeMatcher(ElementSelectors.and(
+                                            ElementSelectors.byNameAndText,
+                                            ElementSelectors.byNameAndAllAttributes)))
+                                .build();
+        Assert.assertFalse(xmlDiff.toString(), xmlDiff.hasDifferences());
     }
 
     public String getContentTypeString(ContentType contentType, Object object) {
