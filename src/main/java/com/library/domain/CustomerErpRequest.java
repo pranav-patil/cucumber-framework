@@ -1,6 +1,6 @@
 package com.library.domain;
 
-public class CustomerRequest {
+public class CustomerErpRequest {
 
     private String customerId;
     private String customerName;

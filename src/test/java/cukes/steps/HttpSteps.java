@@ -15,9 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
-
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +39,7 @@ public class HttpSteps extends BaseStepDefinition {
     }
 
     @Given("^HTTP Session has an attribute \"(.*?)\" with class \"(.*?)\" and (JSON|XML|FORM) value$")
-    public void addObjectAttributeToHttpSession(String attributeName, Class<?> clazz, ContentType contentType, String contentValue) throws IOException, JAXBException {
+    public void addObjectAttributeToHttpSession(String attributeName, Class<?> clazz, ContentType contentType, String contentValue) {
         if(StringUtils.isNotBlank(attributeName) && clazz != null && StringUtils.isNotBlank(contentValue)) {
             Object attributeValue = contentTypeService.getContentTypeObject(contentType, clazz, contentValue);
             getMockHttpSession().setAttribute(attributeName, attributeValue);

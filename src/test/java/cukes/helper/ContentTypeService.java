@@ -51,12 +51,17 @@ public class ContentTypeService {
         return parameters;
     }
 
-    public void assertContentByType(ContentType contentType, String expectedContent, String actualContent) throws IOException, JSONException, SAXException {
-        if(contentType == ContentType.JSON) {
-            assertJSON(expectedContent, actualContent);
-        }
-        else if(contentType == ContentType.XML) {
-            assertXML(expectedContent, actualContent);
+    public void assertContentByType(ContentType contentType, String expectedContent, String actualContent) {
+
+        try {
+            if(contentType == ContentType.JSON) {
+                assertJSON(expectedContent, actualContent);
+            }
+            else if(contentType == ContentType.XML) {
+                assertXML(expectedContent, actualContent);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -102,12 +107,17 @@ public class ContentTypeService {
         }
     }
 
-    public String getContentTypeString(ContentType contentType, Object object) throws JsonProcessingException, JAXBException {
-        if(contentType == ContentType.JSON) {
-            return getJSONString(object);
-        }
-        else if(contentType == ContentType.XML) {
-            return getXMLString(object);
+    public String getContentTypeString(ContentType contentType, Object object) {
+
+        try {
+            if(contentType == ContentType.JSON) {
+                return getJSONString(object);
+            }
+            else if(contentType == ContentType.XML) {
+                return getXMLString(object);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
 
         return null;
@@ -126,17 +136,17 @@ public class ContentTypeService {
         return mapper.writeValueAsString(object);
     }
 
-    public  <T> T getContentTypeObject(ContentType contentType, Class<T> clazz, String contentString) throws IOException, JAXBException {
-        if(contentType == ContentType.JSON) {
-            return getJsonObject(clazz, contentString);
-        } else if(contentType == ContentType.XML) {
-            return getXmlObject(clazz, contentString);
-        } else {
-            try {
+    public  <T> T getContentTypeObject(ContentType contentType, Class<T> clazz, String contentString) {
+        try {
+            if (contentType == ContentType.JSON) {
+                return getJsonObject(clazz, contentString);
+            } else if (contentType == ContentType.XML) {
+                return getXmlObject(clazz, contentString);
+            } else {
                 return clazz.newInstance();
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
             }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 

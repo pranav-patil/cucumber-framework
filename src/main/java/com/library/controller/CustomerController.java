@@ -3,8 +3,8 @@ package com.library.controller;
 import com.library.mongodb.dao.CustomerDAO;
 import com.library.dao.ERPServiceAdapter;
 import com.library.mongodb.dao.SequenceDAO;
-import com.library.domain.CustomerRequest;
-import com.library.domain.CustomerResponse;
+import com.library.domain.CustomerErpRequest;
+import com.library.domain.ErpResponse;
 import com.library.model.Customer;
 import com.library.response.*;
 import com.library.validation.Validate;
@@ -49,18 +49,18 @@ public class CustomerController {
 		customerDomain.setCountry("USA");
 		customerDAO.save(customerDomain);
 
-		CustomerRequest customerRequest = new CustomerRequest();
-		customerRequest.setCustomerId(customerId.toString());
-		customerRequest.setCustomerName(customer.getName());
+		CustomerErpRequest customerErpRequest = new CustomerErpRequest();
+		customerErpRequest.setCustomerId(customerId.toString());
+		customerErpRequest.setCustomerName(customer.getName());
 
-		String response = erpServiceAdapter.post(customerRequest, "/internal/erp/addCustomer");
-		CustomerResponse customerResponse = erpServiceAdapter.getObject(response, CustomerResponse.class);
+		String response = erpServiceAdapter.post(customerErpRequest, "/internal/erp/addCustomer");
+		ErpResponse erpResponse = erpServiceAdapter.getObject(response, ErpResponse.class);
 
-		if("S".equals(customerResponse.getStatus())) {
+		if("Success".equals(erpResponse.getStatus())) {
 			serviceResponse.addMessage(getResponseMessage(MessageCode.CUSTOMER_ADDED, MessageSeverity.SUCCESS));
 		} else {
 			serviceResponse.addMessage(getResponseMessage(MessageCode.CUSTOMER_CREATION_FAILED, MessageSeverity.ERROR));
-			logger.error(customerResponse.getMessage());
+			logger.error(erpResponse.getMessage());
 		}
 
 		return serviceResponse;

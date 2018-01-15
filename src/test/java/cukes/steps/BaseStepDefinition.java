@@ -163,7 +163,7 @@ public class BaseStepDefinition {
         return new String(encoded, Charset.defaultCharset());
     }
 
-    public String getFileContent(ContentType contentType, String filename) throws URISyntaxException, IOException {
+    public File getFile(ContentType contentType, String filename) throws URISyntaxException {
 
         String extension = "." + contentType.extension();
 
@@ -172,7 +172,11 @@ public class BaseStepDefinition {
         }
 
         URL resource = this.getClass().getResource(filename);
-        return getFileContent(new File(resource.toURI()));
+        return new File(resource.toURI());
+    }
+
+    public String getFileContent(ContentType contentType, String filename) throws URISyntaxException, IOException {
+        return getFileContent(getFile(contentType, filename));
     }
 
     public MockMvc getMockMvc() {
