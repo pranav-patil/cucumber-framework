@@ -257,8 +257,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.mockrunner</groupId>
-			<artifactId>mockrunner</artifactId>
-			<version>0.3.1</version>
+			<artifactId>mockrunner-jms</artifactId>
+			<version>1.1.2</version>
 			<scope>test</scope>
 		</dependency>
 

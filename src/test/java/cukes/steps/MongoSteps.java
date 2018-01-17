@@ -63,17 +63,17 @@ public class MongoSteps extends BaseStepDefinition {
             }
         }
 
-        for (BeanDefinition beanDef : domainBeans) {
+        if(domainBeans != null) {
+            for (BeanDefinition beanDef : domainBeans) {
 
-            MultiValueMap<String, Object> document = ((AnnotatedBeanDefinition) beanDef).getMetadata()
-                    .getAllAnnotationAttributes(org.springframework.data.mongodb.core.mapping.Document.class.getName());
+                MultiValueMap<String, Object> document = ((AnnotatedBeanDefinition) beanDef).getMetadata()
+                        .getAllAnnotationAttributes(org.springframework.data.mongodb.core.mapping.Document.class.getName());
 
-            if(document != null) {
                 Class<?> clazz = Class.forName(beanDef.getBeanClassName());
                 String collectionName = clazz.getSimpleName();
                 collectionName = Character.toLowerCase(collectionName.charAt(0)) + collectionName.substring(1);
 
-                if (document.containsKey("collection")) {
+                if (document != null && document.containsKey("collection")) {
                     String collection = (String) document.getFirst("collection");
                     if (!StringUtils.isBlank(collection)) {
                         collectionName = collection;

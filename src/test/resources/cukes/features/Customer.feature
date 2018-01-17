@@ -26,7 +26,7 @@ Feature: Add a new customer and get the customer details.
     And Verify that MongoDB collection "customer" has 1 records which match the conditions
       | customerId | name           | age     |
       | 2          | John Dillinger | 21      |
-    And Verify that the application log contains ""
+    And Verify that the application log is empty
 
    Scenario: Find existing customer and fetch customer details by customer id
      Given JSON response for GET service "/internal/erp/allCustomers"
@@ -36,7 +36,6 @@ Feature: Add a new customer and get the customer details.
 
     When HTTP GET Service is called with URL "/customer/all"
     Then Verify HTTP Status is "OK" and response matches with JSON filename "allCustomersResponse"
-    And Verify that the application log contains ""
 
   Scenario: ERP System sends JMS notification message which is added to the mongodb
     Given collection "notification" has no records

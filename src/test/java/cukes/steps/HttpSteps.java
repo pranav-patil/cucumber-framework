@@ -10,7 +10,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cukes.type.ContentType;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.matchers.JUnitMatchers;
+import org.hamcrest.CoreMatchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -159,7 +159,6 @@ public class HttpSteps extends BaseStepDefinition {
                                + serviceResponse.getMessages().get(0).getMessage() ,
                     serviceResponse.messagesHasSeverityAndMessage(severity, message));
         }
-
     }
 
     @Then("^Verify that the application log contains \"(.*?)\"$")
@@ -168,6 +167,12 @@ public class HttpSteps extends BaseStepDefinition {
         if (expectedLog.isEmpty()) {
             assertThat(requestLog, isEmptyOrNullString());
         }
-        assertThat(requestLog, JUnitMatchers.containsString(expectedLog));
+        assertThat(requestLog, CoreMatchers.containsString(expectedLog));
+    }
+
+    @Then("^Verify that the application log is empty$")
+    public void verifyLogIsEmpty() throws Exception {
+        String requestLog = getRequestLog();
+        assertThat(requestLog, isEmptyOrNullString());
     }
 }
