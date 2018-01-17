@@ -5,45 +5,37 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 @Component("jmsMessageSender")
 public class JMSMessageSender {
 
     @Qualifier("notificationJmsTemplate")
     @Autowired
-    protected JmsTemplate jmsTemplate;
-    protected Queue replyToDestination;
+    private JmsTemplate jmsTemplate;
+    private Queue replyDestination;
 
     private static Logger logger = LoggerFactory.getLogger(JMSMessageSender.class);
 
-    public JmsTemplate getJmsTemplate() {
-        return jmsTemplate;
+    public Queue getReplyDestination() {
+        return replyDestination;
     }
 
-    public void setJmsTemplate(JmsTemplate jmsTemplate) {
-        this.jmsTemplate = jmsTemplate;
-    }
-
-    public Queue getReplyToDestination() {
-        return replyToDestination;
-    }
-
-    public void setReplyToDestination(Queue replyToDestination) {
-        this.replyToDestination = replyToDestination;
+    public void setReplyDestination(Queue replyDestination) {
+        this.replyDestination = replyDestination;
     }
 
     public void sendMessage(final String payload) throws JMSException {
-        jmsTemplate.send(new MessageCreator() {
-            public Message createMessage(Session session) throws JMSException {
-                TextMessage message = session.createTextMessage(payload);
-                message.setJMSReplyTo(replyToDestination);
-                logger.info(String.format("JMSMessageSender.sendMessage '{%s}'", payload));
-                return message;
-            }
+        jmsTemplate.send((Session session) ->  {
+            TextMessage message = session.createTextMessage(payload);
+            message.setJMSReplyTo(replyDestination);
+            logger.info(String.format("JMSMessageSender.sendMessage '{%s}'", payload));
+            return message;
         });
     }
 }

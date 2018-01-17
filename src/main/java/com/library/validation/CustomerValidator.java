@@ -24,7 +24,7 @@ public class CustomerValidator implements Validator {
 
 		Customer customer = (Customer) target;
 
-		if(StringUtils.isBlank(customer.getName())) {
+		if(StringUtils.isBlank(customer.getFirstName()) || StringUtils.isBlank(customer.getLastName())) {
 			errors.reject(MessageCode.UNKNOWN_ERROR.name(), "Customer name is blank");
 		}
 

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozer.sourceforge.net" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://dozer.sourceforge.net http://dozer.sourceforge.net/schema/beanmapping.xsd">
+
+    <mapping map-null="false" date-format="yyyy-MM-dd'T'HH:mm:ss.SSSZ">
+        <class-a>com.library.domain.NotificationRequest</class-a>
+        <class-b>com.library.mongodb.domain.Notification</class-b>
+        <field>
+            <a>notificationId</a>
+            <b>identifier</b>
+        </field>
+        <field>
+            <a>notificationType</a>
+            <b>type</b>
+        </field>
+        <field>
+            <a>notificationMessage</a>
+            <b>message</b>
+        </field>
+        <field>
+			<a>notificationTimestamp</a>
+            <b>creationDate</b>
+        </field>
+    </mapping>
+</mappings>

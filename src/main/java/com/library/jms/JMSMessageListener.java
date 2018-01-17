@@ -2,6 +2,8 @@ package com.library.jms;
 
 import com.library.domain.NotificationRequest;
 import com.library.mongodb.dao.NotificationDAO;
+import com.library.mongodb.domain.Notification;
+import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ public class JMSMessageListener implements MessageListener {
     private MessageConverter messageConverter;
     @Autowired
     private NotificationDAO notificationDAO;
+    @Autowired
+    private DozerBeanMapper dozerBeanMapper;
 
     private static Logger logger = LoggerFactory.getLogger(JMSMessageListener.class);
 
@@ -60,6 +64,7 @@ public class JMSMessageListener implements MessageListener {
     }
 
     private void processMessage(NotificationRequest notificationRequest) {
-
+        Notification notification = dozerBeanMapper.map(notificationRequest, Notification.class);
+        notificationDAO.save(notification);
     }
 }

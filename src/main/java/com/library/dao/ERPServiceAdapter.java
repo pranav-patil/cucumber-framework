@@ -1,10 +1,10 @@
 package com.library.dao;
 
 
-import com.library.response.MessageCode;
-import com.library.validation.ServiceException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.library.response.MessageCode;
+import com.library.validation.ServiceException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -32,6 +32,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 
 @Component
 @Profile("!stub")
@@ -131,6 +132,11 @@ public class ERPServiceAdapter {
     public <T> T getObject(String response, Class<T> className) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(response, className);
+    }
+
+    public <T> List<T> getObjectList(String response, Class<T> className) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, className));
     }
 
     protected String getResponseString(CloseableHttpResponse httpResponse) throws IOException {

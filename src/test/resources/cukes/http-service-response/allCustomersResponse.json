@@ -1,0 +1,30 @@
+{
+  "messages": [
+    {
+      "messageId": "01",
+      "severity": "success",
+      "messageCode": "SUCCESS",
+      "message": "Request successfully completed."
+    }
+  ],
+  "customers": [
+    {
+      "firstName": "Jason",
+      "lastName": "Bourne",
+      "age": "31",
+      "phoneNumber": "9991348945",
+      "address": "Langley, VA",
+      "email": "jbourne@cia.gov",
+      "country": "USA"
+    },
+    {
+      "firstName": "John",
+      "lastName": "Dillinger",
+      "age": "45",
+      "phoneNumber": "7092134567",
+      "address": "Chicago, IL",
+      "email": "johnDill@gmail.com",
+      "country": "USA"
+    }
+  ]
+}

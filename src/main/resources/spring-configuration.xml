@@ -28,7 +28,8 @@
 	<bean id="financeDozerMapper" class="org.dozer.DozerBeanMapper">
 		<property name="mappingFiles">
 			<list>
-				<!--<value>dozermapping/dozerMapping.xml</value>-->
+				<value>dozermapping/notification-request-mapping.xml</value>
+				<value>dozermapping/customer-request-mapping.xml</value>
 			</list>
 		</property>
 	</bean>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NotificationRequest>
+    <NotificationId>MSG00345</NotificationId>
+    <NotificationType>INFO</NotificationType>
+    <NotificationMessage>Customer details updated</NotificationMessage>
+    <NotificationTimestamp>2016-08-13T05:08:56.235-0700</NotificationTimestamp>
+</NotificationRequest>

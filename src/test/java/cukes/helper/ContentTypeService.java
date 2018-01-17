@@ -3,8 +3,11 @@ package cukes.helper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.thoughtworks.xstream.XStream;
 import cukes.type.ContentType;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -36,6 +39,7 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -249,5 +253,27 @@ public class ContentTypeService {
     private String getElementByXpathExpression(Document document, String xpathExpression) throws XPathExpressionException {
         XPathExpression xp = XPathFactory.newInstance().newXPath().compile(xpathExpression);
         return xp.evaluate(document);
+    }
+
+    public String getJSONArrayString(List<Map<String, String>> mapList) {
+
+        JsonArray jsonArray = new JsonArray();
+        for (Map<String, String> map : mapList) {
+            JsonObject element = new JsonObject();
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                element.addProperty(entry.getKey(), entry.getValue());
+            }
+            jsonArray.add(element);
+        }
+
+        return jsonArray.toString();
+    }
+
+    public String getXMLArrayString(List<Map<String, String>> mapList, String xmlRootElement, String xmlArrayElement) {
+        XStream xStream = new XStream();
+        xStream.registerConverter(new MapEntryXmlConverter());
+        xStream.alias(xmlRootElement, List.class);
+        xStream.alias(xmlArrayElement, Map.class);
+        return xStream.toXML(mapList);
     }
 }

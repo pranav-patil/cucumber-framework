@@ -4,17 +4,27 @@
        xsi:schemaLocation="
     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+    <bean id="messageQueueConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
         <property name="brokerURL" value="${TCP_CHANNEL}" />
     </bean>
 
-    <bean id="messageDestination" class="org.apache.activemq.command.ActiveMQQueue">
+    <bean id="messageQueueDestination" class="org.apache.activemq.command.ActiveMQQueue">
         <constructor-arg value="${QUEUE_NAME}"/>
     </bean>
 
     <bean id="notificationJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-        <property name="connectionFactory" ref="connectionFactory"/>
-        <property name="defaultDestination" ref="messageDestination"/>
+        <property name="connectionFactory" ref="messageQueueConnectionFactory"/>
+        <property name="defaultDestination" ref="messageQueueDestination"/>
+    </bean>
+
+    <bean id="notificationsMessageListenerContainer"
+          class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="messageQueueConnectionFactory"/>
+        <property name="messageListener" ref="jmsMessageListener"/>
+        <property name="destination" ref="messageQueueDestination"/>
+        <property name="concurrency" value="1-2"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="autoStartup" value="true" />
     </bean>
 
     <bean id="oxmMessageConverter" class="org.springframework.jms.support.converter.MarshallingMessageConverter">

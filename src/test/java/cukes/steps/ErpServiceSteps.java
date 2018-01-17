@@ -12,6 +12,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +30,29 @@ public class ErpServiceSteps extends BaseStepDefinition {
     private int servicePort;
 
     private static final Pattern SERVICE_PATTERN = Pattern.compile("^/internal/erp/(.*)$");
+
+    @Given("^JSON response for GET service \"(.*?)\"$")
+    public void serviceGetJSONResponse(String serviceUrl, DataTable dataTable) throws Exception {
+        serviceUrl = getFullURL(serviceUrl);
+        List<Map<String, String>> mapList = dataTable.asMaps(String.class, String.class);
+        String responseString = contentTypeService.getJSONArrayString(mapList);
+        stubBaseHttpClient.setResponseData(HttpMethod.GET, serviceUrl, ContentType.JSON, HttpStatus.OK, responseString);
+    }
+
+    @Given("^XML response with array element \"(.*?)\" and root element \"(.*?)\" for GET service \"(.*?)\"$")
+    public void serviceGetXMLResponse(String arrayElement, String rootElement, String serviceUrl, DataTable dataTable) throws Exception {
+        serviceUrl = getFullURL(serviceUrl);
+        List<Map<String, String>> mapList = dataTable.asMaps(String.class, String.class);
+        String responseString = contentTypeService.getXMLArrayString(mapList, rootElement, arrayElement);
+        stubBaseHttpClient.setResponseData(HttpMethod.GET, serviceUrl, ContentType.JSON, HttpStatus.OK, responseString);
+    }
+
+    @Given("^filename \"(.*?)\" is (JSON|XML|FORM) response for GET service \"(.*?)\"$")
+    public void givenHanaServiceFileResponse(String filename, ContentType contentType, String serviceUrl) throws Exception {
+        serviceUrl = getFullURL(serviceUrl);
+        String responseString = getFileContent(contentType, ServiceStubHttpClient.SERVICE_MOCK_RESPONSE_PATH + filename);
+        stubBaseHttpClient.setResponseData(HttpMethod.GET, serviceUrl, contentType, HttpStatus.OK, responseString);
+    }
 
     @Given("^(GET|PUT|POST) \"(.*?)\" service with (JSON|XML|FORM) request returns success$")
     public void serviceSuccessForService(HttpMethod method, String serviceUrl, ContentType contentType) {

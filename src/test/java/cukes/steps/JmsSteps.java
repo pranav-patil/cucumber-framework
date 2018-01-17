@@ -11,11 +11,11 @@ public class JmsSteps extends BaseStepDefinition {
     @Autowired
     private JMSMessageSender jmsMessageSender;
 
-    public static final String BASE_JMS_MESSAGE_PATH = "/cukes/integration/jms-messages/";
+    public static final String BASE_JMS_MESSAGE_PATH = "/cukes/jms-messages/";
 
     @When("^The notification queue receives the (JSON|XML|FORM) message with filename \"(.*?)\"$")
     public void sendNotification(ContentType contentType, String filename) throws Exception {
-        String requestPayload = getFileContent(contentType, BASE_JMS_MESSAGE_PATH + filename);
-        jmsMessageSender.sendMessage(requestPayload);
+        String message = getFileContent(contentType, BASE_JMS_MESSAGE_PATH + filename);
+        jmsMessageSender.sendMessage(message);
     }
 }

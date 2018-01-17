@@ -2,7 +2,7 @@ package com.library.response;
 
 import com.library.model.Customer;
 
-public class CustomerDetailsResponse extends ServiceResponse {
+public class CustomerResponse extends ServiceResponse {
 
     private Customer customer;
 
