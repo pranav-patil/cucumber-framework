@@ -58,27 +58,27 @@ public class HttpSteps extends BaseStepDefinition {
         getMockHttpSession().clearAttributes();
     }
 
-    @When("^HTTP GET Service is called with URL \"(.*?)\"$")
-    public void callGETService(String serviceUrl) throws Exception {
-        ResultActions resultActions = get(serviceUrl);
+    @When("^HTTP GET Service is called with URL \"(.*?)\" returning (JSON|XML|FORM) response$")
+    public void callGETService(String serviceUrl, ContentType contentType) throws Exception {
+        ResultActions resultActions = get(serviceUrl, contentType);
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP POST Service URL \"(.*?)\" is called$")
-    public void callPOSTServiceWithNoRequestPayload(String serviceUrl) throws Exception {
-        ResultActions resultActions = post(serviceUrl);
+    @When("^HTTP POST Service URL \"(.*?)\" is called returning (JSON|XML|FORM) response$")
+    public void callPOSTServiceWithNoRequestPayload(String serviceUrl, ContentType contentType) throws Exception {
+        ResultActions resultActions = post(serviceUrl, contentType);
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP PUT Service URL \"(.*?)\" is called$")
-    public void callPUTService(String serviceUrl) throws Exception {
-        ResultActions resultActions = put(serviceUrl);
+    @When("^HTTP PUT Service URL \"(.*?)\" is called returning (JSON|XML|FORM) response$")
+    public void callPUTService(String serviceUrl, ContentType contentType) throws Exception {
+        ResultActions resultActions = put(serviceUrl, contentType);
         setHTTPResult(scenario, resultActions);
     }
 
-    @When("^HTTP DELETE Service URL \"(.*?)\" is called$")
-    public void callDELETEService(String serviceUrl) throws Exception {
-        ResultActions resultActions = delete(serviceUrl);
+    @When("^HTTP DELETE Service URL \"(.*?)\" is called returning (JSON|XML|FORM) response$")
+    public void callDELETEService(String serviceUrl, ContentType contentType) throws Exception {
+        ResultActions resultActions = delete(serviceUrl, contentType);
         setHTTPResult(scenario, resultActions);
     }
 

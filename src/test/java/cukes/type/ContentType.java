@@ -36,4 +36,13 @@ public enum ContentType {
         }
         return null;
     }
+
+    public static ContentType getContentType(MediaType mediaType) {
+        for(ContentType contentType : ContentType.values()){
+            if(contentType.mediaType == mediaType) {
+                return contentType;
+            }
+        }
+        return null;
+    }
 }

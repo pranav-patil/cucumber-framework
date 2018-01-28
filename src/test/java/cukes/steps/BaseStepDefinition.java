@@ -61,7 +61,7 @@ public class BaseStepDefinition {
 
     private MockMvc mockMvc;
     private MockHttpSession mockSession;
-    protected static final Logger logger = Logger.getLogger(RunCukesTest.class.getName());
+    protected static final Logger logger = Logger.getLogger(BaseStepDefinition.class.getName());
 
     @PostConstruct
     public void setup() {
@@ -82,20 +82,24 @@ public class BaseStepDefinition {
         return builder.toString();
     }
 
-    public ResultActions get(String url) throws Exception {
+    public ResultActions get(String url, ContentType contentType) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.get(url)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(contentType.mediaType())
+                .accept(contentType.mediaType())
                 .session(mockSession));
     }
 
-    public ResultActions post(String url) throws Exception {
+    public ResultActions post(String url, ContentType contentType) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.post(url)
+                                        .contentType(contentType.mediaType())
+                                        .accept(contentType.mediaType())
                                         .session(mockSession));
     }
 
     public ResultActions post(String url, ContentType contentType, Object object) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.post(url)
                                                         .contentType(contentType.mediaType())
+                                                        .accept(contentType.mediaType())
                                                         .session(mockSession)
                                                         .content(contentTypeService.getContentTypeString(contentType, object)));
     }
@@ -104,6 +108,7 @@ public class BaseStepDefinition {
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post(url)
                                                         .contentType(contentType.mediaType())
+                                                        .accept(contentType.mediaType())
                                                         .session(mockSession);
 
         if(contentType == ContentType.FORM && !StringUtils.isBlank(request)) {
@@ -119,15 +124,18 @@ public class BaseStepDefinition {
         return mockMvc.perform(requestBuilder);
     }
 
-    public ResultActions put(String url) throws Exception {
+    public ResultActions put(String url, ContentType contentType) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.put(url)
-                        .session(mockSession));
+                                .contentType(contentType.mediaType())
+                                .accept(contentType.mediaType())
+                                .session(mockSession));
     }
 
     public ResultActions put(String url, ContentType contentType, String request) throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(url)
                 .contentType(contentType.mediaType())
+                .accept(contentType.mediaType())
                 .session(mockSession);
 
         if(contentType == ContentType.FORM && !StringUtils.isBlank(request)) {
@@ -143,9 +151,11 @@ public class BaseStepDefinition {
         return mockMvc.perform(requestBuilder.content(request));
     }
 
-    public ResultActions delete(String url) throws Exception {
+    public ResultActions delete(String url, ContentType contentType) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.delete(url)
-                        .session(mockSession));
+                                .contentType(contentType.mediaType())
+                                .accept(contentType.mediaType())
+                                .session(mockSession));
     }
 
     public Map<String, String> getMap(DataTable dataTable) {

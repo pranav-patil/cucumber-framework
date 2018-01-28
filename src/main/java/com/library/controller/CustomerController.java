@@ -12,17 +12,22 @@ import org.dozer.DozerBeanMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Controller
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
+
+@RestController
 @RequestMapping("/customer")
 public class CustomerController {
 
@@ -37,11 +42,11 @@ public class CustomerController {
 
 	Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
-	@RequestMapping(value = "/add", method = RequestMethod.POST)
-	@ResponseBody
+	@PostMapping(value = "/add", consumes = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE},
+								 produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@Validate(type=Customer.class, validators={"customerValidator"})
-	public ServiceResponse addCustomer(@RequestBody Customer customer) throws Exception {
+	public ServiceResponse addCustomer(@RequestBody Customer customer, HttpServletRequest request) throws Exception {
 		ServiceResponse serviceResponse = new ServiceResponse();
 
 		String fullName = customer.getFirstName() + " " + customer.getLastName();
@@ -59,7 +64,14 @@ public class CustomerController {
 		erpCustomer.setFullName(fullName);
 		erpCustomer.setCountry(customer.getCountry());
 
-		String response = erpServiceAdapter.post(erpCustomer, "/internal/erp/addCustomer");
+		String accept = request.getHeader(HttpHeaders.ACCEPT);
+		MediaType mediaType = MediaType.APPLICATION_JSON;
+
+		if(MediaType.APPLICATION_XML.toString().equals(accept)) {
+			mediaType = MediaType.APPLICATION_XML;
+		}
+
+		String response = erpServiceAdapter.post("/internal/erp/addCustomer", erpCustomer, mediaType);
 		ErpResponse erpResponse = erpServiceAdapter.getObject(response, ErpResponse.class);
 
 		if("Success".equals(erpResponse.getStatus())) {
@@ -72,8 +84,7 @@ public class CustomerController {
 		return serviceResponse;
 	}
 
-	@RequestMapping(value = "/id/{customerId}", method = RequestMethod.GET)
-	@ResponseBody
+	@GetMapping(value = "/id/{customerId}", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public CustomerResponse getCustomer(@PathVariable("customerId") String customerId) {
 		com.library.mongodb.domain.Customer customerDomain = customerDAO.findById(Long.valueOf(customerId));
@@ -84,12 +95,18 @@ public class CustomerController {
 		return customerResponse;
 	}
 
-	@RequestMapping(value = "/all", method = RequestMethod.GET)
-	@ResponseBody
+	@GetMapping(value = "/all", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
 	@PreAuthorize("hasAnyRole('ADMIN')")
-	public CustomerListResponse getAllCustomers() throws IOException {
+	public CustomerListResponse getAllCustomers(HttpServletRequest request) throws IOException {
 
-		String response = erpServiceAdapter.getRequest("/internal/erp/allCustomers");
+		String accept = request.getHeader(HttpHeaders.ACCEPT);
+		MediaType mediaType = MediaType.APPLICATION_JSON;
+
+		if(MediaType.APPLICATION_XML.toString().equals(accept)) {
+			mediaType = MediaType.APPLICATION_XML;
+		}
+
+		String response = erpServiceAdapter.getRequest("/internal/erp/allCustomers", mediaType);
 		List<ErpCustomer> erpCustomers = erpServiceAdapter.getObjectList(response, ErpCustomer.class);
 
 		List<Customer> customers = erpCustomers.stream()

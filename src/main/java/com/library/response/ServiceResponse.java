@@ -1,11 +1,16 @@
 package com.library.response;
 
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "serviceResponse")
 public class ServiceResponse {
 
-    private List<ResponseMessage> messages = new ArrayList<ResponseMessage>();
+    @XmlElementWrapper(name = "messages")
+    @XmlElement(name = "message")
+    private List<ResponseMessage> messages = new ArrayList<>();
 
     public List<ResponseMessage> getMessages() {
         return messages;

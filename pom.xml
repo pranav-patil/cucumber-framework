@@ -135,6 +135,11 @@
 			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.7</version>
@@ -175,6 +180,11 @@
 			<groupId>net.sf.dozer</groupId>
 			<artifactId>dozer</artifactId>
 			<version>${dozer.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.11.0</version>
 		</dependency>
 
 		<!-- CUCUMBER TEST FRAMEWORK -->

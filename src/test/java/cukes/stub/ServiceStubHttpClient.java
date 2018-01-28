@@ -39,14 +39,14 @@ public class ServiceStubHttpClient {
 
     protected CloseableHttpResponse getStubResponse(HttpMethod httpMethod, String url, ContentType contentType, StringEntity stringEntity) throws IOException {
 
-        String jsonRequestPayload = null;
+        String requestPayload = null;
         if(stringEntity != null) {
             StringWriter writer = new StringWriter();
             IOUtils.copy(stringEntity.getContent(), writer, Charset.defaultCharset());
-            jsonRequestPayload = writer.toString();
+            requestPayload = writer.toString();
         }
 
-        ServiceResponse serviceResponseData = getResponseData(httpMethod, url, contentType, jsonRequestPayload);
+        ServiceResponse serviceResponseData = getResponseData(httpMethod, url, contentType, requestPayload);
         String serviceResponseString = null;
 
         if(serviceResponseData != null) {

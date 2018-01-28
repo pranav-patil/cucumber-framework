@@ -1,0 +1,10 @@
+<serviceResponse>
+    <messages>
+        <message>
+            <messageId>01</messageId>
+            <severity>success</severity>
+            <messageCode>CUSTOMER_ADDED</messageCode>
+            <message>Customer is created successfully.</message>
+        </message>
+    </messages>
+</serviceResponse>

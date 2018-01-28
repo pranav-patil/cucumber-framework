@@ -25,12 +25,19 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -50,58 +57,57 @@ public class ERPServiceAdapter {
     private String servicePassword;
 
     public static Integer DEFAULT_TIMEOUT = 120000;
-    public static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
-    public static final String APPLICATION_JSON = "application/json";
-    public static final String HTTP_HEADER_ACCEPT = "Accept";
-    public static final String HTTP_HEADER_ACCEPT_CHARSET = "Accept-Charset";
     public static final String ACCEPT_CHARSET_UTF8 = "UTF-8";
 
-    public String getRequest(String serviceUrl) throws IOException {
+    public String getRequest(String serviceUrl, MediaType mediaType) throws IOException {
         serviceUrl = generateUrl(serviceUrl);
-        CloseableHttpResponse response = get(serviceUrl);
+        CloseableHttpResponse response = get(serviceUrl, mediaType);
         return getResponseString(response);
     }
 
-    public CloseableHttpResponse get(String serviceUrl) throws IOException {
+    public CloseableHttpResponse get(String serviceUrl, MediaType mediaType) throws IOException {
         HttpGet httpGet = new HttpGet(serviceUrl);
+        httpGet.setHeader(HttpHeaders.ACCEPT, mediaType.toString());
         CloseableHttpClient httpClient = getHttpClient();
         HttpHost target = new HttpHost(serviceHost, servicePort, serviceScheme);
         HttpClientContext context = getHttpClientContext(target);
         return httpClient.execute(target, httpGet, context);
     }
 
-    public String post(Object object, String serviceUrl) throws IOException {
+    public String post(String serviceUrl, Object object, MediaType mediaType) throws IOException {
         serviceUrl = generateUrl(serviceUrl);
-        CloseableHttpResponse response = post(new StringEntity(getJsonString(object)), serviceUrl);
+        String string = getString(object, mediaType);
+        CloseableHttpResponse response = post(serviceUrl, new StringEntity(string), mediaType);
         return getResponseString(response);
     }
 
-    public CloseableHttpResponse post(StringEntity entity, String serviceUrl) throws IOException {
+    public CloseableHttpResponse post(String serviceUrl, StringEntity entity, MediaType mediaType) throws IOException {
         CloseableHttpClient httpClient = getHttpClient();
         HttpHost target = new HttpHost(serviceHost, servicePort, serviceScheme);
         HttpClientContext context = getHttpClientContext(target);
         HttpPost httpPost = new HttpPost(serviceUrl);
-        httpPost.setHeader(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
-        httpPost.setHeader(HTTP_HEADER_ACCEPT, APPLICATION_JSON);
-        httpPost.setHeader(HTTP_HEADER_ACCEPT_CHARSET, ACCEPT_CHARSET_UTF8);
+        httpPost.setHeader(HttpHeaders.CONTENT_TYPE, mediaType.toString());
+        httpPost.setHeader(HttpHeaders.ACCEPT, mediaType.toString());
+        httpPost.setHeader(HttpHeaders.ACCEPT_CHARSET, ACCEPT_CHARSET_UTF8);
         httpPost.setEntity(entity);
         return httpClient.execute(target, httpPost, context);
     }
 
-    public String put(Object object, String serviceUrl) throws IOException {
+    public String put(String serviceUrl, Object object, MediaType mediaType) throws IOException {
         serviceUrl = generateUrl(serviceUrl);
-        CloseableHttpResponse response = put(new StringEntity(getJsonString(object)), serviceUrl);
+        String string = getString(object, mediaType);
+        CloseableHttpResponse response = put(serviceUrl, new StringEntity(string), mediaType);
         return getResponseString(response);
     }
 
-    public CloseableHttpResponse put(StringEntity entity, String serviceUrl) throws IOException {
+    public CloseableHttpResponse put(String serviceUrl, StringEntity entity, MediaType mediaType) throws IOException {
         CloseableHttpClient httpClient = getHttpClient();
         HttpHost target = new HttpHost(serviceHost, servicePort, serviceScheme);
         HttpClientContext context = getHttpClientContext(target);
         HttpPut httpPut = new HttpPut(serviceUrl);
-        httpPut.setHeader(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
-        httpPut.setHeader(HTTP_HEADER_ACCEPT, APPLICATION_JSON);
-        httpPut.setHeader(HTTP_HEADER_ACCEPT_CHARSET, ACCEPT_CHARSET_UTF8);
+        httpPut.setHeader(HttpHeaders.CONTENT_TYPE, mediaType.toString());
+        httpPut.setHeader(HttpHeaders.ACCEPT, mediaType.toString());
+        httpPut.setHeader(HttpHeaders.ACCEPT_CHARSET, ACCEPT_CHARSET_UTF8);
         httpPut.setEntity(entity);
         return httpClient.execute(target, httpPut, context);
     }
@@ -114,10 +120,9 @@ public class ERPServiceAdapter {
                                                             .setConnectTimeout(DEFAULT_TIMEOUT)
                                                             .setConnectionRequestTimeout(DEFAULT_TIMEOUT)
                                                             .build();
-        CloseableHttpClient httpClient = HttpClients.custom()
-                                                    .setDefaultRequestConfig(defaultRequestConfig)
-                                                    .build();
-        return httpClient;
+        return HttpClients.custom()
+                          .setDefaultRequestConfig(defaultRequestConfig)
+                          .build();
     }
 
     private HttpClientContext getHttpClientContext(HttpHost target) {
@@ -129,9 +134,28 @@ public class ERPServiceAdapter {
         return context;
     }
 
-    public <T> T getObject(String response, Class<T> className) throws IOException {
+    public <T> T getObject(String response, Class<T> className) {
+        try {
+            return getJsonObject(response, className);
+        } catch (Exception ex) {
+            try {
+                return getXMLObject(response, className);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    }
+
+    public <T> T getJsonObject(String response, Class<T> className) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(response, className);
+    }
+
+    public <T> T getXMLObject(String response, Class<T> className) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(className);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        StringReader reader = new StringReader(response);
+        return (T) unmarshaller.unmarshal(reader);
     }
 
     public <T> List<T> getObjectList(String response, Class<T> className) throws IOException {
@@ -172,11 +196,35 @@ public class ERPServiceAdapter {
         return uriComponents.toUriString();
     }
 
+    private String getString(Object object, MediaType mediaType) {
+
+        try {
+            if(MediaType.APPLICATION_JSON == mediaType) {
+                return getJsonString(object);
+            }
+
+            if (MediaType.APPLICATION_XML == mediaType) {
+                return getXmlString(object);
+            }
+        }catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return null;
+    }
+
     private String getJsonString(Object object) throws JsonProcessingException {
         if (object != null) {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(object);
         }
         return null;
+    }
+
+    private String getXmlString(Object object) throws JAXBException {
+        StringWriter writer = new StringWriter();
+        JAXBContext jaxbContext = JAXBContext.newInstance(object.getClass());
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.marshal(object, writer);
+        return writer.toString();
     }
 }

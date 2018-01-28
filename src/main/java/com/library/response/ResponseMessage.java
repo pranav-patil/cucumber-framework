@@ -1,10 +1,19 @@
 package com.library.response;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ResponseMessage {
 
+    @XmlElement
     private String messageId;
+    @XmlElement
     private MessageSeverity severity;
+    @XmlElement
     private MessageCode messageCode;
+    @XmlElement
     private String message;
 
     public ResponseMessage() {
