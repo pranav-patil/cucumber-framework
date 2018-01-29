@@ -45,15 +45,15 @@ import java.util.List;
 @Profile("!stub")
 public class ERPServiceAdapter {
 
-    @Value("${SERVICE_SCHEME}")
+    @Value("${ERP_SERVICE_SCHEME}")
     private String serviceScheme;
-    @Value("${SERVICE_HOST}")
+    @Value("${ERP_SERVICE_HOST}")
     private String serviceHost;
-    @Value("${SERVICE_PORT}")
+    @Value("${ERP_SERVICE_PORT}")
     private int servicePort;
-    @Value("${SERVICE_USERNAME}")
+    @Value("${ERP_SERVICE_USERNAME}")
     private String serviceUserName;
-    @Value("${SERVICE_PASSWORD}")
+    @Value("${ERP_SERVICE_PASSWORD}")
     private String servicePassword;
 
     public static Integer DEFAULT_TIMEOUT = 120000;

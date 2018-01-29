@@ -1,90 +1,61 @@
 package cukes.stub;
 
-
 import cukes.dto.ComplexHashMap;
+import cukes.dto.GenericServiceType;
 import cukes.dto.ServiceIdentifier;
 import cukes.dto.ServiceResponse;
 import cukes.helper.ContentTypeService;
 import cukes.type.ContentType;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicStatusLine;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import java.util.regex.Matcher;
 
 @Component
-public class ServiceStubHttpClient {
+public class GenericStubService {
 
     @Autowired
     private ContentTypeService contentTypeService;
+    @Autowired
+    private Map<String, GenericServiceType> genericServiceMap;
+
     private ComplexHashMap<ServiceIdentifier, ServiceResponse> responseData = new ComplexHashMap<>();
 
-    public static final String SERVICE_MOCK_RESPONSE_PATH = "/cukes/service-stub-response/";
+    public String getStubResponse(HttpMethod httpMethod, String url, ContentType contentType, String requestPayload) throws IOException {
 
-    protected CloseableHttpResponse getStubResponse(HttpMethod httpMethod, String url, ContentType contentType, StringEntity stringEntity) throws IOException {
-
-        String requestPayload = null;
-        if(stringEntity != null) {
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(stringEntity.getContent(), writer, Charset.defaultCharset());
-            requestPayload = writer.toString();
-        }
-
+        String stubResponse = null;
         ServiceResponse serviceResponseData = getResponseData(httpMethod, url, contentType, requestPayload);
-        String serviceResponseString = null;
 
         if(serviceResponseData != null) {
 
             if(serviceResponseData.getResponseString() != null) {
-                serviceResponseString = serviceResponseData.getResponseString();
+                stubResponse = serviceResponseData.getResponseString();
             }
             else if(serviceResponseData.getResponseFile() != null) {
                 String path = serviceResponseData.getResponseFile().getPath();
                 byte[] encoded = Files.readAllBytes(Paths.get(path));
-                serviceResponseString = new String(encoded, Charset.defaultCharset());
+                stubResponse = new String(encoded, Charset.defaultCharset());
             }
         }
 
-
-        if(serviceResponseString == null) {
-            throw new RuntimeException("No Response found in Stub for url: " + url);
+        if(stubResponse == null) {
+            throw new RuntimeException("No Stub Response found for service url: " + url);
         }
 
-        return createMockCloseableHttpResponse(serviceResponseString);
+        return stubResponse;
     }
 
-    private CloseableHttpResponse createMockCloseableHttpResponse(String responseString) throws IOException {
-        CloseableHttpResponse response = mock(CloseableHttpResponse.class);
-        HttpEntity entity = mock(HttpEntity.class);
-
-        byte[] bytes = responseString.getBytes(StandardCharsets.UTF_8);
-        InputStream inputStream = new ByteArrayInputStream(bytes);
-
-        when(response.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.OK.value(), "OK"));
-        when(response.getEntity()).thenReturn(entity);
-        when(entity.getContent()).thenReturn(inputStream);
-        when(entity.getContentLength()).thenReturn((long)bytes.length);
-
-        return response;
-    }
-
-    public ServiceResponse getResponseData(HttpMethod httpMethod, String url, ContentType contentType, String requestString) {
+    private ServiceResponse getResponseData(HttpMethod httpMethod, String url, ContentType contentType, String requestString) {
         ServiceIdentifier identifier = new ServiceIdentifier(httpMethod, url, contentType);
         List<ServiceResponse> allResponsesForService = responseData.getAll(identifier);
 
@@ -133,5 +104,35 @@ public class ServiceStubHttpClient {
 
     public void clearStubResponses() {
         responseData.clear();
+    }
+
+    public String getFullURL(String serviceName, String serviceUrl) {
+        GenericServiceType genericServiceType = genericServiceMap.get(serviceName);
+
+        if(genericServiceType != null) {
+
+            if(genericServiceType.getUrlPattern() != null) {
+                Matcher matcher = genericServiceType.getUrlPattern().matcher(serviceUrl);
+
+                if (!matcher.find()) {
+                    throw new RuntimeException(String.format("Invalid %s Service URL %s", serviceName, serviceUrl));
+                }
+            }
+
+            if(StringUtils.isNotBlank(genericServiceType.getScheme()) && StringUtils.isNotBlank(genericServiceType.getHost())) {
+                return String.format("%s://%s:%d%s", genericServiceType.getScheme(), genericServiceType.getHost(),
+                                                     genericServiceType.getPort(), serviceUrl);
+            }
+        }
+        return serviceUrl;
+    }
+
+    public String getFullFilePath(String serviceName, String filename) {
+        GenericServiceType genericServiceType = genericServiceMap.get(serviceName);
+
+        if(genericServiceType != null && StringUtils.isNotBlank(genericServiceType.getResponseFilePath())) {
+            return genericServiceType.getResponseFilePath() + filename;
+        }
+        return filename;
     }
 }

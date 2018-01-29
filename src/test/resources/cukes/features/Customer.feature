@@ -7,7 +7,7 @@ Feature: Add a new customer and get the customer details.
     Given current date is "2016-08-13T12:08:56.235-0600"
 
   Scenario: Add a new customer details in JSON format
-    Given POST "/internal/erp/addCustomer" service returns success when JSON request matches the values
+    Given ERP POST "/internal/erp/addCustomer" service returns success when JSON request matches the values
       | CustomerId | FullName       |
       | 2          | John Dillinger |
     And MongoDB sequence "CustomerSeq" has counter 1
@@ -29,7 +29,7 @@ Feature: Add a new customer and get the customer details.
     And Verify that the application log is empty
 
   Scenario: Add a new customer details in XML format
-    Given POST "/internal/erp/addCustomer" service returns success when XML request matches the values
+    Given ERP POST "/internal/erp/addCustomer" service returns success when XML request matches the values
       | ERPCustomer.CustomerId | ERPCustomer.FullName |
       | 3                      | James Bill           |
     And User "Richard Kelvin" login with id "USER01" and businessActivity "ROLE_ADMIN"
@@ -47,7 +47,7 @@ Feature: Add a new customer and get the customer details.
       | 3          | James Bill | 31      |
 
    Scenario: Find existing customer and fetch customer details by customer id
-     Given JSON response for GET service "/internal/erp/allCustomers"
+     Given JSON response for "ERP" GET service "/internal/erp/allCustomers"
        | CustomerId | FullName       | Age | PhoneNumber | Address     | EmailAddress       | Country |
        | 12312      | Jason Bourne   | 31  | 9991348945  | Langley, VA | jbourne@cia.gov    | USA     |
        | 45667      | John Dillinger | 45  | 7092134567  | Chicago, IL | johnDill@gmail.com | USA     |
