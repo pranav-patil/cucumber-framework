@@ -20,3 +20,4 @@ Cucumber Features.
 * JmsSteps provides ability to send messages to the mock queue using [mockrunner](https://mockrunner.github.io/).
 * SecuritySteps lets you define the user id for login and the access roles associated with the user.
 * MongoSteps enables to add, delete records, execute queries and verify records with fields exists in the database.
+* Supports [Auto Mock](https://github.com/rinoto/spring-auto-mock) which [dynamically mocks](https://dzone.com/articles/automatically-inject-mocks) dependent beans which are not found in Spring configuration.
