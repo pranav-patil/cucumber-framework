@@ -1,8 +1,8 @@
 package com.library.validation;
 
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -17,8 +17,8 @@ public class RequestBodyValidatorAspect implements ApplicationContextAware {
 
 	private ApplicationContext applicationContext;
 
-	@Around("@annotation(validate)")
-	public Object validate(ProceedingJoinPoint joinPoint, Validate validate) throws Throwable {
+	@Before("@annotation(validate)")
+	public void validate(JoinPoint joinPoint, Validate validate) {
 		Object target = null;
 		BindingResult result = null;
 
@@ -53,9 +53,10 @@ public class RequestBodyValidatorAspect implements ApplicationContextAware {
 					throw new ValidationException(result);
 				}
 			}
+		} else {
+			throw new IllegalArgumentException(String.format("@Validate type argument '%s' not present for class method %s.%s", type.getSimpleName(),
+					joinPoint.getSignature().getDeclaringType().getSimpleName(), joinPoint.getSignature().getName()));
 		}
-
-		return joinPoint.proceed(args);
 	}
 
 	@Override

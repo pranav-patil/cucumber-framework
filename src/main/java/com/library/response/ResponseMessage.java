@@ -17,11 +17,14 @@ public class ResponseMessage {
     private String message;
 
     public ResponseMessage() {
-        super();
-        messageId = "01";
-        severity = MessageSeverity.ERROR;
-        messageCode = MessageCode.UNKNOWN_ERROR;
-        message = MessageCode.UNKNOWN_ERROR.name();
+        this(MessageCode.UNKNOWN_ERROR, MessageSeverity.ERROR);
+    }
+
+    public ResponseMessage(MessageCode messageCode, MessageSeverity messageSeverity) {
+        this.messageId = "01";
+        this.messageCode = messageCode;
+        this.message = messageCode.value();
+        this.severity = messageSeverity;
     }
 
     public MessageSeverity getSeverity() {

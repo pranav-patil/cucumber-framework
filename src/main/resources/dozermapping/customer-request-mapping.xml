@@ -7,11 +7,19 @@
         <class-b>com.library.mongodb.domain.Customer</class-b>
         <field>
             <a>firstName</a>
-            <b>name</b>
+            <b>firstName</b>
+        </field>
+        <field>
+            <a>lastName</a>
+            <b>lastName</b>
         </field>
         <field>
             <a>age</a>
             <b>age</b>
+        </field>
+        <field>
+            <a>email</a>
+            <b>email</b>
         </field>
         <field>
             <a>country</a>

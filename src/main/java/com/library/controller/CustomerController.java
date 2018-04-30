@@ -3,9 +3,9 @@ package com.library.controller;
 import com.library.dao.ERPServiceAdapter;
 import com.library.domain.ErpCustomer;
 import com.library.domain.ErpResponse;
-import com.library.model.Customer;
 import com.library.mongodb.dao.CustomerDAO;
 import com.library.mongodb.dao.SequenceDAO;
+import com.library.mongodb.domain.Customer;
 import com.library.response.*;
 import com.library.validation.Validate;
 import org.dozer.DozerBeanMapper;
@@ -45,15 +45,16 @@ public class CustomerController {
 	@PostMapping(value = "/add", consumes = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE},
 								 produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
 	@PreAuthorize("hasAnyRole('ADMIN')")
-	@Validate(type=Customer.class, validators={"customerValidator"})
-	public ServiceResponse addCustomer(@RequestBody Customer customer, HttpServletRequest request) throws Exception {
+	@Validate(type=com.library.model.Customer.class, validators={"customerValidator"})
+	public ServiceResponse addCustomer(@RequestBody com.library.model.Customer customer, HttpServletRequest request) throws Exception {
 		ServiceResponse serviceResponse = new ServiceResponse();
 
-		String fullName = customer.getFirstName() + " " + customer.getLastName();
-		com.library.mongodb.domain.Customer customerDomain = dozerBeanMapper.map(customer, com.library.mongodb.domain.Customer.class);
+		Customer customerDomain = dozerBeanMapper.map(customer, Customer.class);
 		Long customerId = sequenceDAO.getNextSequence("CustomerSeq", 1L);
 		customerDomain.setCustomerId(customerId.toString());
-		customerDomain.setName(fullName);
+		customerDomain.setFirstName(customer.getFirstName());
+		customerDomain.setLastName(customer.getLastName());
+		customerDomain.setEmail(customer.getEmail());
 		customerDomain.setLocked(false);
 		customerDomain.setCreationDate(new Date());
 		customerDomain.setLastUpdatedDate(new Date());
@@ -61,7 +62,7 @@ public class CustomerController {
 
 		ErpCustomer erpCustomer = new ErpCustomer();
 		erpCustomer.setCustomerId(customerId.toString());
-		erpCustomer.setFullName(fullName);
+		erpCustomer.setFullName(customer.getFirstName() + " " + customer.getLastName());
 		erpCustomer.setCountry(customer.getCountry());
 
 		String accept = request.getHeader(HttpHeaders.ACCEPT);
@@ -75,9 +76,9 @@ public class CustomerController {
 		ErpResponse erpResponse = erpServiceAdapter.getObject(response, ErpResponse.class);
 
 		if("Success".equals(erpResponse.getStatus())) {
-			serviceResponse.addMessage(getResponseMessage(MessageCode.CUSTOMER_ADDED, MessageSeverity.SUCCESS));
+			serviceResponse.addMessage(new ResponseMessage(MessageCode.CUSTOMER_ADDED, MessageSeverity.SUCCESS));
 		} else {
-			serviceResponse.addMessage(getResponseMessage(MessageCode.CUSTOMER_CREATION_FAILED, MessageSeverity.ERROR));
+			serviceResponse.addMessage(new ResponseMessage(MessageCode.CUSTOMER_CREATION_FAILED, MessageSeverity.ERROR));
 			logger.error(erpResponse.getMessage());
 		}
 
@@ -87,11 +88,11 @@ public class CustomerController {
 	@GetMapping(value = "/id/{customerId}", produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public CustomerResponse getCustomer(@PathVariable("customerId") String customerId) {
-		com.library.mongodb.domain.Customer customerDomain = customerDAO.findById(Long.valueOf(customerId));
-		Customer customer = dozerBeanMapper.map(customerDomain, Customer.class);
+		Customer customerDomain = customerDAO.findById(Long.valueOf(customerId));
+		com.library.model.Customer customer = dozerBeanMapper.map(customerDomain, com.library.model.Customer.class);
 		CustomerResponse customerResponse = new CustomerResponse();
 		customerResponse.setCustomer(customer);
-		customerResponse.setMessages(Collections.singletonList(getResponseMessage(MessageCode.SUCCESS, MessageSeverity.SUCCESS)));
+		customerResponse.setMessages(Collections.singletonList(new ResponseMessage(MessageCode.SUCCESS, MessageSeverity.SUCCESS)));
 		return customerResponse;
 	}
 
@@ -109,18 +110,18 @@ public class CustomerController {
 		String response = erpServiceAdapter.getRequest("/internal/erp/allCustomers", mediaType);
 		List<ErpCustomer> erpCustomers = erpServiceAdapter.getObjectList(response, ErpCustomer.class);
 
-		List<Customer> customers = erpCustomers.stream()
+		List<com.library.model.Customer> customers = erpCustomers.stream()
 												.map(p -> createCustomer(p))
 												.collect(Collectors.toList());
 
 		CustomerListResponse customerListResponse = new CustomerListResponse();
 		customerListResponse.setCustomers(customers);
-		customerListResponse.setMessages(Collections.singletonList(getResponseMessage(MessageCode.SUCCESS, MessageSeverity.SUCCESS)));
+		customerListResponse.setMessages(Collections.singletonList(new ResponseMessage(MessageCode.SUCCESS, MessageSeverity.SUCCESS)));
 		return customerListResponse;
 	}
 
-	private Customer createCustomer(ErpCustomer p) {
-		Customer customer = dozerBeanMapper.map(p, Customer.class);
+	private com.library.model.Customer createCustomer(ErpCustomer p) {
+		com.library.model.Customer customer = dozerBeanMapper.map(p, com.library.model.Customer.class);
 		String[] names = p.getFullName().split(" ");
 		if(names.length == 2) {
             customer.setLastName(names[1]);
@@ -129,13 +130,5 @@ public class CustomerController {
             customer.setFirstName(names[0]);
         }
 		return customer;
-	}
-
-	private ResponseMessage getResponseMessage(MessageCode messageCode, MessageSeverity messageSeverity) {
-		ResponseMessage responseMessage = new ResponseMessage();
-		responseMessage.setMessageCode(messageCode);
-		responseMessage.setMessage(messageCode.value());
-		responseMessage.setSeverity(messageSeverity);
-		return responseMessage;
 	}
 }

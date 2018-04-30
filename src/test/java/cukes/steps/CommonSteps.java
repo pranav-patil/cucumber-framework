@@ -42,7 +42,7 @@ public class CommonSteps extends BaseStepDefinition {
     }
 
     @Given("^current date is today with timezone \"(.*?)\"$")
-    public void setupCurrentDateAsToday(String timezone) throws Throwable {
+    public void setupCurrentDateAsToday(String timezone) {
         dateService.setCurrentDate(DateServiceImpl.getCurrentDate(TimeZone.getTimeZone(timezone)));
     }
 }

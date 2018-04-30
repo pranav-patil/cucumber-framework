@@ -1,4 +1,4 @@
-package com.library.validation;
+package com.library.validation.validator;
 
 import com.library.model.Customer;
 import com.library.response.MessageCode;
@@ -27,7 +27,5 @@ public class CustomerValidator implements Validator {
 		if(StringUtils.isBlank(customer.getFirstName()) || StringUtils.isBlank(customer.getLastName())) {
 			errors.reject(MessageCode.UNKNOWN_ERROR.name(), "Customer name is blank");
 		}
-
-		//ValidationUtils.rejectIfEmpty(errors, "name", "machinePaymentsPageBean.cartId.empty", "Name field is empty");
 	}
 }

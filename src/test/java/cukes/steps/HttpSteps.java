@@ -162,7 +162,7 @@ public class HttpSteps extends BaseStepDefinition {
     }
 
     @Then("^Verify that the application log contains \"(.*?)\"$")
-    public void verifyLogContains(String expectedLog) throws Exception {
+    public void verifyLogContains(String expectedLog) {
         String requestLog = getRequestLog();
         if (expectedLog.isEmpty()) {
             assertThat(requestLog, isEmptyOrNullString());
@@ -171,7 +171,7 @@ public class HttpSteps extends BaseStepDefinition {
     }
 
     @Then("^Verify that the application log is empty$")
-    public void verifyLogIsEmpty() throws Exception {
+    public void verifyLogIsEmpty() {
         String requestLog = getRequestLog();
         assertThat(requestLog, isEmptyOrNullString());
     }

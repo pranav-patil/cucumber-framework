@@ -12,20 +12,21 @@ Feature: Add a new customer and get the customer details.
       | 2          | John Dillinger |
     And MongoDB sequence "CustomerSeq" has counter 1
     And collection "customer" has data
-      | customerId | name           | age     | creationDate                 | lastUpdatedDate              | locked | country |
-      | 1          | Jason Bourne   | 31      | 2016-10-01T00:00:00.000-0500 | 2016-10-01T00:00:00.000-0500 | false  | Ghana   |
+      | customerId | firstName | lastName | age | email         | creationDate                 | lastUpdatedDate              | locked | country |
+      | 1          | Jason     | Bourne   | 31  | jbarn@cia.gov | 2016-10-01T00:00:00.000-0500 | 2016-10-01T00:00:00.000-0500 | false  | Ghana   |
     And User "Richard Kelvin" login with id "USER01" and businessActivity "ROLE_ADMIN"
     When HTTP POST Service is called with URL "/customer/add" and JSON request
     """
         { "firstName": "John",
           "lastName": "Dillinger",
-          "age": 21
+          "age": 21,
+          "email": "dillinger@police.gov"
         }
     """
     Then Verify HTTP Status is "OK" and response matches with JSON filename "customerAddResponse"
     And Verify that MongoDB collection "customer" has 1 records which match the conditions
-      | customerId | name           | age     |
-      | 2          | John Dillinger | 21      |
+      | customerId | firstName | lastName  | age | email                |
+      | 2          | John      | Dillinger | 21  | dillinger@police.gov |
     And Verify that the application log is empty
 
   Scenario: Add a new customer details in XML format
@@ -39,12 +40,13 @@ Feature: Add a new customer and get the customer details.
             <firstName>James</firstName>
             <lastName>Bill</lastName>
             <age>31</age>
+            <email>jbill@emprovise.com</email>
        </customer>
     """
     Then Verify HTTP Status is "OK" and response matches with XML filename "customerAddResponse"
     And Verify that MongoDB collection "customer" has 1 records which match the conditions
-      | customerId | name       | age     |
-      | 3          | James Bill | 31      |
+      | customerId | firstName | lastName | age     | email               |
+      | 3          | James     | Bill     | 31      | jbill@emprovise.com |
 
    Scenario: Find existing customer and fetch customer details by customer id
      Given JSON response for "ERP" GET service "/internal/erp/allCustomers"
