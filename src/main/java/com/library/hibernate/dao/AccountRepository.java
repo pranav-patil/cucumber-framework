@@ -7,7 +7,7 @@ import org.springframework.data.repository.Repository;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface AccountDAO extends Repository<Account, Long> {
+public interface AccountRepository extends Repository<Account, Long> {
 
     Collection<Account> findAll();
     Optional<Account> findByAccountId(String accountId);

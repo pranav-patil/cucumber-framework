@@ -1,6 +1,6 @@
 package com.library.controller;
 
-import com.library.hibernate.dao.AccountDAO;
+import com.library.hibernate.dao.AccountRepository;
 import com.library.hibernate.domain.Account;
 import com.library.model.Transaction;
 import com.library.mongodb.dao.CustomerDAO;
@@ -32,7 +32,7 @@ public class AccountController {
     @Autowired
     private CustomerDAO customerDAO;
     @Autowired
-    private AccountDAO accountDAO;
+    private AccountRepository accountRepository;
 
     @PostMapping(value = "/setup", consumes = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE},
             produces = {APPLICATION_JSON_VALUE, APPLICATION_XML_VALUE})
@@ -48,14 +48,14 @@ public class AccountController {
         accountDomain.setBalance(account.getBalance());
         accountDomain.setModifiedDate(new Date());
 
-        Customer customer = customerDAO.findById(Long.valueOf(account.getCustomerId()));
+        Customer customer = customerDAO.findByCustomerId(account.getCustomerId());
         if(customer != null) {
             accountDomain.setFirstName(customer.getFirstName());
             accountDomain.setLastName(customer.getLastName());
             accountDomain.setEmail(customer.getEmail());
         }
 
-        accountDAO.save(accountDomain);
+        accountRepository.save(accountDomain);
         serviceResponse.setMessages(Collections.singletonList(new ResponseMessage(MessageCode.SUCCESS, MessageSeverity.SUCCESS)));
         return serviceResponse;
     }
@@ -67,12 +67,12 @@ public class AccountController {
     public ServiceResponse transferFunds(@RequestBody Transaction transaction) {
         ServiceResponse serviceResponse = new ServiceResponse();
 
-        Optional<Account> senderAccountOptional = accountDAO.findByAccountId(transaction.getAccountNumber());
+        Optional<Account> senderAccountOptional = accountRepository.findByAccountId(transaction.getAccountNumber());
         if(!senderAccountOptional.isPresent()) {
             throw new ServiceException(MessageCode.VALIDATION_FAILED, String.format("Sender Account Id %s not present.", transaction.getAccountNumber()));
         }
 
-        Optional<Account> receiverAccountOptional = accountDAO.findByAccountId(transaction.getRecipientAccount());
+        Optional<Account> receiverAccountOptional = accountRepository.findByAccountId(transaction.getRecipientAccount());
         if(!receiverAccountOptional.isPresent()) {
             throw new ServiceException(MessageCode.VALIDATION_FAILED, String.format("Receiver Account Id %s not present.", transaction.getRecipientAccount()));
         }
@@ -83,8 +83,8 @@ public class AccountController {
         Account recipientAccount = receiverAccountOptional.get();
         recipientAccount.setBalance(recipientAccount.getBalance().add(transaction.getAmount()));
 
-        accountDAO.save(senderAccount);
-        accountDAO.save(recipientAccount);
+        accountRepository.save(senderAccount);
+        accountRepository.save(recipientAccount);
 
         serviceResponse.setMessages(Collections.singletonList(new ResponseMessage(MessageCode.SUCCESS, MessageSeverity.SUCCESS)));
         return serviceResponse;

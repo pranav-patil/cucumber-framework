@@ -55,19 +55,22 @@
         <property name="password" value="" />
     </bean>
 
-    <bean id="jpaEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="generateDdl" value="false" />
+        <property name="showSql" value="true" />
+        <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" />
+        <property name="database" value="HSQL"/>
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource" />
         <property name="packagesToScan" value="com.library.hibernate.domain" />
-        <property name="jpaVendorAdapter">
-            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
-        </property>
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
         <property name="jpaProperties">
             <props>
-                <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.hbm2ddl.auto">create-only</prop>
                 <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
-                <prop key="hibernate.hbm2ddl.import_files_sql_extractor">org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor</prop>
                 <prop key="hibernate.show_sql">true</prop>
-                <!--<prop key="javax.persistence.sql-load-script-source">embeddeddb/insert-data.sql</prop>-->
             </props>
         </property>
     </bean>

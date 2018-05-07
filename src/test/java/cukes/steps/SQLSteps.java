@@ -87,7 +87,6 @@ public class SQLSteps extends BaseStepDefinition {
         for (Map<String, String> dataMap : dataTableMaps) {
             insert(table, fieldTypeService.convertToObjectMap(tableClass, dataMap));
         }
-        System.out.println("done");
     }
 
     @Given("^SQL sequence \"(.*?)\" has counter (\\d+)$")
@@ -96,6 +95,17 @@ public class SQLSteps extends BaseStepDefinition {
 
     @Given("^delete records from SQL table \"(.*?)\" which match the conditions$")
     public void deleteTableRecordsWithConditions$(String table, DataTable dataTable) {
+
+        Class<?> tableClass = getTableClass(table);
+        Map<String, Object> paramObjectMap = fieldTypeService.convertToObjectMap(tableClass, getMap(dataTable));
+        Collection<Object> values = paramObjectMap.values();
+
+        String parameters = paramObjectMap.keySet().stream()
+                                                   .map(e -> e + " = ?")
+                                                   .collect(Collectors.joining(" AND "));
+        String sqlQuery = String.format("DELETE FROM %s WHERE %s", table, parameters);
+        int deletedRows = sqlJdbcTemplate.update(sqlQuery, values.toArray(new Object[values.size()]));
+        System.out.println(String.format("Deleted %d rows from %s", deletedRows, table));
     }
 
     @And("^Drop table \"(.*?)\"")
@@ -105,9 +115,9 @@ public class SQLSteps extends BaseStepDefinition {
 
     @Then("^Verify that SQL table \"(.*?)\" has (\\d+) records which match the conditions$")
     public void verifyTableHasRecordsWithConditions$(String table, int numberOfRecords, DataTable dataTable) {
-        Map<String, String> map = getMap(dataTable);
         Class<?> tableClass = getTableClass(table);
-        Map<String, Object> paramObjectMap = fieldTypeService.convertToObjectMap(tableClass, map);
+        Map<String, String> dataMap = getMap(dataTable);
+        Map<String, Object> paramObjectMap = fieldTypeService.convertToObjectMap(tableClass, dataMap);
         Collection<Object> values = paramObjectMap.values();
 
         String parameters = paramObjectMap.keySet().stream()
@@ -119,8 +129,10 @@ public class SQLSteps extends BaseStepDefinition {
         assertEquals(numberOfRecords, count);
     }
 
-    @Then("^Verify that SQL table \"(.*?)\" has (\\d+) records which match the query")
-    public void verifyTableHasRecordsWithQuery$(String table, int numberOfRecords, String findQuery) {
+    @Then("^Verify that (\\d+) records are fetched by SQL query")
+    public void verifyRecordsFetchedBySQLQuery$(int numberOfRecords, String selectQuery) {
+        List<Map<String, Object>> mapList = sqlJdbcTemplate.queryForList(selectQuery);
+        assertEquals(numberOfRecords, mapList.size());
     }
 
     public void insert(String table, final Map<String, Object> map) {

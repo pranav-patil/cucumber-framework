@@ -44,9 +44,13 @@ public class CustomerDAO {
         mongoTemplate.remove(customer);
     }
 
+    public Customer findByCustomerId(String customerId) {
+        Query query = new Query(Criteria.where("customerId").is(customerId));
+        return mongoTemplate.findOne(query, Customer.class);
+    }
+
     public Customer findByCustomerName(String customerName) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("name").is(customerName));
+        Query query = new Query(Criteria.where("name").is(customerName));
         return mongoTemplate.findOne(query, Customer.class);
     }
 }

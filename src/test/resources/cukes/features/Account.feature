@@ -26,4 +26,8 @@ Feature: Add a new customer and get the customer details.
     And Verify that SQL table "account" has 1 records which match the conditions
       | customerId | firstName | lastName  | email                | branchId | passcode  | balance |
       | 3          | John      | Dillinger | dillinger@police.gov | B2345    | Secret123 | 5600.56 |
+    And Verify that 1 records are fetched by SQL query
+    """
+    SELECT * FROM ACCOUNT WHERE CUSTOMERID = '3'
+    """
     And Verify that the application log is empty
