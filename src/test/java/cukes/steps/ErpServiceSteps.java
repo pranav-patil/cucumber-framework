@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Random;
 
-import static cukes.config.GenericServiceConfig.ERP_SERVICE;
+import static cukes.stub.ERPServiceStubAdapter.ERP_SERVICE;
 
 public class ErpServiceSteps extends BaseStepDefinition {
 

@@ -20,7 +20,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class HttpSteps extends BaseStepDefinition {
+public class HttpSteps extends HttpStepDefinition {
 
     private Scenario scenario;
     private static final String HTTP_MOCK_REQUEST_PATH = "/cukes/http-service-request/";

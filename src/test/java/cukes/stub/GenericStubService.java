@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -26,10 +27,12 @@ public class GenericStubService {
 
     @Autowired
     private ContentTypeService contentTypeService;
-    @Autowired
-    private Map<String, GenericServiceType> genericServiceMap;
-
+    private Map<String, GenericServiceType> genericServiceMap = new HashMap<>();
     private ComplexHashMap<ServiceIdentifier, ServiceResponse> responseData = new ComplexHashMap<>();
+
+    public void register(String serviceName, GenericServiceType serviceType) {
+        genericServiceMap.put(serviceName, serviceType);
+    }
 
     public String getStubResponse(HttpMethod httpMethod, String url, ContentType contentType, String requestPayload) throws IOException {
 

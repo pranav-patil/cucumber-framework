@@ -1,4 +1,4 @@
-package cukes.steps;
+package cukes;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
