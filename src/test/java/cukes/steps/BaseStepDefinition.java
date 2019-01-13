@@ -31,7 +31,7 @@ public class BaseStepDefinition {
         return finalMap;
     }
 
-    public String getFileContent(File file) throws IOException {
+    private String getFileContent(File file) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(file.getPath()));
         return new String(encoded, Charset.defaultCharset());
     }

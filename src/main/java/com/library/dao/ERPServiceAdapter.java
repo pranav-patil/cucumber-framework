@@ -24,7 +24,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,7 +41,6 @@ import java.io.StringWriter;
 import java.util.List;
 
 @Component
-@Profile("!stub")
 public class ERPServiceAdapter {
 
     @Value("${ERP_SERVICE_SCHEME}")

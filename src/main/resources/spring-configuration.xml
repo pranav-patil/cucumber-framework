@@ -26,7 +26,7 @@
 	<tx:annotation-driven/>
 	<context:annotation-config/>
 
-	<context:property-placeholder location="classpath:config/application.properties" ignore-unresolvable="true"/>
+	<context:property-placeholder location="classpath:config/application-${environment}.properties" ignore-unresolvable="true"/>
 	<jpa:repositories base-package="com.library.hibernate.dao" />
 
 	<bean id="financeDozerMapper" class="org.dozer.DozerBeanMapper">

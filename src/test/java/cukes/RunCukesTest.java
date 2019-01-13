@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 public class RunCukesTest {
     @BeforeClass()
     public static void initTestEnvironment() {
+        System.setProperty("environment", "test");
     }
 }
 
