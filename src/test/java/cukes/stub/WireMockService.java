@@ -1,8 +1,8 @@
 package cukes.stub;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import cukes.type.ContentType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
@@ -21,11 +21,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 @Component
 public class WireMockService {
 
-    public WireMockRule wireMockRule;
+    private WireMockServer wireMockServer;
 
     public WireMockService() {
-        this.wireMockRule = new WireMockRule(WireMockConfiguration.wireMockConfig().port(8080));
-        this.wireMockRule.start();
+        this.wireMockServer = new WireMockServer(WireMockConfiguration.options().port(8080).httpsPort(8443));
+        this.wireMockServer.start();
     }
 
     public void setResponseData(HttpMethod httpMethod, String url, ContentType contentType, HttpStatus httpStatus, String responseString) {
@@ -42,7 +42,7 @@ public class WireMockService {
 
     public void setResponseData(HttpMethod httpMethod, String url, ContentType contentType, HttpStatus httpStatus, String responseString, Map<String, String> requestConditions) {
 
-        MappingBuilder mappingBuilder = request(httpMethod.name(), urlPathEqualTo(url));
+        MappingBuilder mappingBuilder = request(httpMethod.name(), urlEqualTo(url));
 
         if(httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT) {
             mappingBuilder = mappingBuilder.withHeader("Content-Type", equalTo(contentType.mediaType().toString()));
@@ -78,12 +78,10 @@ public class WireMockService {
             }
         }
 
-        stubFor(mappingBuilder
-                .willReturn(aResponse()
-                        .withStatus(httpStatus.value())
-                        .withHeader("Content-Type", contentType.mediaType().toString())
-                        .withBody(responseString)
-                ));
+        wireMockServer.stubFor(mappingBuilder.willReturn(aResponse()
+                                                .withStatus(httpStatus.value())
+                                                .withHeader("Content-Type", contentType.mediaType().toString())
+                                                .withBody(responseString)));
     }
 
     private String getFileContent(File file) throws IOException {
@@ -92,6 +90,6 @@ public class WireMockService {
     }
 
     public void clearStubs() {
-        wireMockRule.resetAll();
+        wireMockServer.resetAll();
     }
 }

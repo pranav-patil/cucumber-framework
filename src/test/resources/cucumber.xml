@@ -13,6 +13,9 @@
 
     <import resource="classpath*:spring-configuration.xml"/>
 
+    <context:property-placeholder location="classpath*:config/application-test.properties" order="-1"
+                                  ignore-unresolvable="true" ignore-resource-not-found="true" />
+
     <!-- These lines are to load packages for start up and autowiring -->
     <context:component-scan base-package="cukes.config"/>
     <context:component-scan base-package="cukes.stub"/>

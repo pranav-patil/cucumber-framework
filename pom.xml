@@ -290,8 +290,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.github.tomakehurst</groupId>
-			<artifactId>wiremock</artifactId>
-			<version>2.20.0</version>
+			<artifactId>wiremock-standalone</artifactId>
+			<version>2.23.2</version>
 			<scope>test</scope>
 		</dependency>
 
