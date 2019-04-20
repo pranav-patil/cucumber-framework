@@ -1,4 +1,5 @@
 {
+  "_class": "com.library.response.CustomerListResponse",
   "messages": [
     {
       "messageId": "01",

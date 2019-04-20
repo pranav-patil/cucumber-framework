@@ -3,11 +3,13 @@ package cukes.helper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.thoughtworks.xstream.XStream;
+import cukes.sync.DynamicFilterProvider;
 import cukes.type.ContentType;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -15,6 +17,7 @@ import org.junit.Assert;
 import org.skyscreamer.jsonassert.JSONCompare;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.JSONCompareResult;
+import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -38,9 +41,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -70,7 +71,8 @@ public class ContentTypeService {
     }
 
     private void assertJSON(String expectedJSON, String actualJSON) throws JSONException {
-        JSONCompareResult result = JSONCompare.compareJSON(expectedJSON, actualJSON, JSONCompareMode.LENIENT);
+        CustomComparator customComparator = new AttributeIgnoringComparator(JSONCompareMode.LENIENT, new HashSet<>(Collections.singletonList("_class")));
+        JSONCompareResult result = JSONCompare.compareJSON(expectedJSON, actualJSON, customComparator);
         if(result.failed()) {
             System.out.println("act json: " + actualJSON);
             System.out.println("expected json: " + expectedJSON);
@@ -138,6 +140,8 @@ public class ContentTypeService {
 
     private <T> T getJsonObject(Class<T> clazz, String jsonString) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
+        SimpleBeanPropertyFilter beanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept("_class");
+        objectMapper.setFilterProvider(new DynamicFilterProvider(beanPropertyFilter));
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return objectMapper.readValue(jsonString, clazz);
     }

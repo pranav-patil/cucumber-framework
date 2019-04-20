@@ -17,8 +17,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
-		<spring.version>5.1.3.RELEASE</spring.version>
-		<spring.security.version>5.1.3.RELEASE</spring.security.version>
+		<spring.version>5.1.6.RELEASE</spring.version>
+		<spring.security.version>5.1.5.RELEASE</spring.security.version>
 		<jackson.version>2.9.8</jackson.version>
 		<logback.version>1.1.7</logback.version>
 		<jcl.slf4j.version>1.7.12</jcl.slf4j.version>
@@ -26,6 +26,7 @@
 		<dbh2.version>1.4.196</dbh2.version>
 		<commons-fileupload.version>1.3.1</commons-fileupload.version>
 		<hibernate.version>5.2.12.Final</hibernate.version>
+		<cucumber.version>2.0.0</cucumber.version>
 	</properties>
 
 	<dependencies>
@@ -151,7 +152,7 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.7</version>
+			<version>2.8.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
@@ -195,6 +196,11 @@
 			<artifactId>xercesImpl</artifactId>
 			<version>2.11.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.11</version>
+		</dependency>
 
 		<!-- H2 DB -->
 		<dependency>
@@ -217,21 +223,21 @@
 			<version>1.3</version>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-java</artifactId>
-			<version>1.2.5</version>
+			<version>${cucumber.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-junit</artifactId>
-			<version>1.2.5</version>
+			<version>${cucumber.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-spring</artifactId>
-			<version>1.2.5</version>
+			<version>${cucumber.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -299,12 +305,12 @@
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
-			<version>2.7.0</version>
+			<version>2.9.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
-			<version>2.7.0</version>
+			<version>2.9.2</version>
 		</dependency>
 
 		<!-- LOGGING -->

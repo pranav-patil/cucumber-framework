@@ -1,0 +1,14 @@
+[
+  {
+    "className": "com.library.response.CustomerListResponse",
+    "jsonFiles": [
+        "http-service-response/allCustomersResponse.json"
+	]
+  },
+  {
+	"className": "com.library.response.ServiceResponse",
+    "jsonFiles": [
+		"http-service-response/customerAddResponse.json"
+	]
+  }
+]
