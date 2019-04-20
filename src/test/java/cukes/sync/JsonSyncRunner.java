@@ -1,5 +1,6 @@
 package cukes.sync;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
@@ -7,12 +8,18 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,20 +34,23 @@ import java.util.Set;
 public class JsonSyncRunner {
 
     private ObjectMapper objectMapper;
-    private File resourceDir;
+    private boolean fileSyncEnabled;
 
     // JSON SYNC RUNNER SETTINGS FILE NAME
     private static final String JSON_SYNC_CONFIG_FILE = "config/json_sync_config.json";
     private static String[] FIELDS_TO_IGNORE = new String[]{"_class"};
+    private static final Gson GSON = new Gson();
+    Logger logger = LoggerFactory.getLogger(JsonSyncRunner.class);
 
-    public JsonSyncRunner() throws URISyntaxException {
+    public JsonSyncRunner() {
         this.objectMapper = getObjectMapper();
-        Path resourcePath = Paths.get(getClass().getResource("/cukes").toURI());
-        this.resourceDir = Paths.get(resourcePath.toString().replace("\\target\\test-classes\\", "\\src\\test\\resources\\")).toFile();
+        this.fileSyncEnabled = Boolean.valueOf(System.getProperty("fileSyncEnabled", "false"));
     }
 
-    private void scanAndSyncJson() throws IOException {
-        JsonClassConfig[] jsonClassConfigs = loadJson();
+    private void scanAndSyncJson() throws IOException, URISyntaxException {
+        Path resourcePath = Paths.get(getClass().getResource("/cukes").toURI());
+        File resourceDir = Paths.get(resourcePath.toString().replace("\\target\\test-classes\\", "\\src\\test\\resources\\")).toFile();
+        JsonClassConfig[] jsonClassConfigs = loadJson(resourceDir);
         Set<File> filesProcessed = new LinkedHashSet<>();
 
         if(jsonClassConfigs != null){
@@ -93,19 +103,57 @@ public class JsonSyncRunner {
     private void syncJson(Class<?> aClass, File jsonFile)  {
         try {
             String jsonString = FileUtils.readFileToString(jsonFile, Charset.defaultCharset());
-            Object object = objectMapper.readValue(jsonString, aClass);
-
-            if(StringUtils.isNotBlank(jsonString)) {
-                SimpleBeanPropertyFilter beanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept(FIELDS_TO_IGNORE);
-                objectMapper.addMixIn(Object.class, DynamicFilterMixIn.class);
-                objectMapper.setFilterProvider(new DynamicFilterProvider(beanPropertyFilter));
-
-                String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
-                FileUtils.writeStringToFile(jsonFile, json, Charset.defaultCharset(), false);
-                System.out.println(String.format("Updated Json file %s with class %s.", jsonFile.getAbsolutePath(), aClass.getCanonicalName()));
-            }
+            syncJson(jsonFile, jsonString, aClass);
         }catch (IOException ex) {
             throw new RuntimeException(String.format("Sync of Json file %s with Class %s failed.", jsonFile, aClass.getCanonicalName()), ex);
+        }
+    }
+
+    public void syncJson(File jsonFile)  {
+
+        String classname = "UNKNOWN";
+        try {
+            jsonFile = Paths.get(jsonFile.getAbsolutePath().replace("\\target\\test-classes\\", "\\src\\test\\resources\\")).toFile();
+            String jsonString = FileUtils.readFileToString(jsonFile, Charset.defaultCharset());
+            syncJson(jsonFile, jsonString, getJsonDomainClass(jsonString));
+
+        }catch (IOException | ClassNotFoundException ex) {
+            logger.error(String.format("Sync of Json file %s with Class %s failed.", jsonFile, classname), ex);
+        }
+    }
+
+    private Class<?> getJsonDomainClass(String jsonString) throws ClassNotFoundException {
+
+        JsonObject jsonObject = GSON.fromJson(jsonString, JsonObject.class);
+        JsonElement classElement = jsonObject.get("_class");
+
+        if(classElement != null) {
+            return Class.forName(classElement.getAsString());
+        }
+
+        return null;
+    }
+
+    private void syncJson(File jsonFile, String jsonString, Class<?> aClass) throws IOException {
+        Object object = objectMapper.readValue(jsonString, aClass);
+
+        if (StringUtils.isNotBlank(jsonString)) {
+            SimpleBeanPropertyFilter beanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept(FIELDS_TO_IGNORE);
+            objectMapper.addMixIn(Object.class, DynamicFilterMixIn.class);
+            objectMapper.setFilterProvider(new DynamicFilterProvider(beanPropertyFilter));
+            String json;
+
+            if(fileSyncEnabled) {
+                objectMapper.enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
+                ObjectNode jsonNode = objectMapper.convertValue(object, ObjectNode.class);
+                jsonNode = jsonNode.put("_class", aClass.getCanonicalName());
+                json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+            } else {
+                json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+            }
+
+            FileUtils.writeStringToFile(jsonFile, json, Charset.defaultCharset(), false);
+            System.out.println(String.format("Updated Json file %s with class %s.", jsonFile.getAbsolutePath(), aClass.getCanonicalName()));
         }
     }
 
@@ -122,7 +170,7 @@ public class JsonSyncRunner {
         return objectMapper;
     }
 
-    private JsonClassConfig[] loadJson() throws IOException {
+    private JsonClassConfig[] loadJson(File resourceDir) throws IOException {
         File configFile = new File(resourceDir.getParent(), JSON_SYNC_CONFIG_FILE);
         String configString = FileUtils.readFileToString(configFile, Charset.defaultCharset());
         configString = configString.replace('\\', '/');
@@ -141,7 +189,7 @@ public class JsonSyncRunner {
         return null;
     }
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalAccessException, URISyntaxException {
+    public static void main(String[] args) throws IOException, URISyntaxException {
         JsonSyncRunner steps = new JsonSyncRunner();
         steps.scanAndSyncJson();
     }

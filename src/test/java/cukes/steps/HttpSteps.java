@@ -7,6 +7,7 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import cukes.sync.JsonSyncRunner;
 import cukes.type.ContentType;
 import io.cucumber.datatable.DataTable;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,9 @@ import org.hamcrest.CoreMatchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.io.File;
+import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.junit.Assert.assertThat;
@@ -23,12 +27,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class HttpSteps extends HttpStepDefinition {
 
     private Scenario scenario;
+    private boolean fileSyncEnabled;
     private static final String HTTP_MOCK_REQUEST_PATH = "/cukes/http-service-request/";
     private static final String HTTP_MOCK_RESPONSE_PATH = "/cukes/http-service-response/";
+    private static final JsonSyncRunner JSON_SYNC = new JsonSyncRunner();
 
     @Before
     public void before(Scenario scenario) {
         this.scenario = scenario;
+        this.fileSyncEnabled = Boolean.valueOf(System.getProperty("fileSyncEnabled", "false"));
     }
 
     @Given("^HTTP Session has an attribute \"(.*?)\" with the value \"(.*?)\"$")
@@ -84,6 +91,7 @@ public class HttpSteps extends HttpStepDefinition {
 
     @When("^HTTP POST Service is called with URL \"(.*?)\" and (JSON|XML|FORM) request filename \"(.*?)\"$")
     public void callPOSTServiceWithFilePayload(String serviceUrl, ContentType contentType, String filename) throws Exception {
+        syncDataFileWithDomainClass(contentType,HTTP_MOCK_RESPONSE_PATH + filename);
         String requestPayload = getFileContent(contentType,HTTP_MOCK_REQUEST_PATH + filename);
         ResultActions resultActions = post(serviceUrl, contentType, requestPayload);
         setHTTPResult(scenario, resultActions);
@@ -133,6 +141,7 @@ public class HttpSteps extends HttpStepDefinition {
 
     @Then("^Verify HTTP Status is \"(.*?)\" and response matches with (JSON|XML|FORM) filename \"(.*?)\"$")
     public void verifyResponseWithFile(HttpStatus httpStatus, ContentType contentType, String filename) throws Exception {
+        syncDataFileWithDomainClass(contentType,HTTP_MOCK_RESPONSE_PATH + filename);
         String expectedResponse = getFileContent(contentType,HTTP_MOCK_RESPONSE_PATH + filename);
         verifyResponse(httpStatus, contentType, expectedResponse);
     }
@@ -174,5 +183,13 @@ public class HttpSteps extends HttpStepDefinition {
     public void verifyLogIsEmpty() {
         String requestLog = getRequestLog();
         assertThat(requestLog, isEmptyOrNullString());
+    }
+
+    private void syncDataFileWithDomainClass(ContentType contentType, String filename) throws URISyntaxException {
+        File file = getFile(contentType, filename);
+
+        if(fileSyncEnabled && ContentType.JSON == contentType) {
+            JSON_SYNC.syncJson(file);
+        }
     }
 }

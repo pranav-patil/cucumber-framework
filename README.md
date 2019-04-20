@@ -27,6 +27,7 @@ The Cucumber Integration Test Showcase, combines the simplicity from first appro
 * SQLSteps enables to insert, delete records, execute basic SQL queries and verify records with fields exists in the SQL database.
 * MongoSteps enables to add, delete records, execute queries and verify records with fields exists in the MongoDB.
 * Supports [Auto Mock](https://github.com/rinoto/spring-auto-mock) which [dynamically mocks](https://dzone.com/articles/automatically-inject-mocks) dependent beans which are not found in Spring configuration.
+* Provides ability to automatically update the request/response JSON files by syncing them with their corresponding domain classes. The domain class for JSON files is determined by an additional field `_class` which is used only for JSON file syncing and ignored while sending the payload or verification of JSON responses. The JSON syncing using `_class` can be done dynamically while running the cucumber tests by passing the JVM argument `-DfileSyncEnabled=true`. Alternatively, a configuration file is used `test/resources/config/json_sync_config.json` by JsonSyncRunner to determine the domain class for each JSON file. 
 
 ### Running Cucumber Tests
 
