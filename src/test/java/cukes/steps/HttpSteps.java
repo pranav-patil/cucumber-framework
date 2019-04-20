@@ -2,13 +2,13 @@ package cukes.steps;
 
 import com.library.response.MessageSeverity;
 import com.library.response.ServiceResponse;
-import cucumber.api.DataTable;
 import cucumber.api.Scenario;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import cukes.type.ContentType;
+import io.cucumber.datatable.DataTable;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
 import org.springframework.http.HttpStatus;

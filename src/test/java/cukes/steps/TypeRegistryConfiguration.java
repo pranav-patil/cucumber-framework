@@ -1,4 +1,4 @@
-package cukes.config;
+package cukes.steps;
 
 import cucumber.api.TypeRegistry;
 import cucumber.api.TypeRegistryConfigurer;

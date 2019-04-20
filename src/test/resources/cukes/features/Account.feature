@@ -4,7 +4,7 @@
 Feature: Add a new customer and get the customer details.
 
   Background:
-    Given current date is "2016-08-13T12:08:56.235-0600"
+    Given current date is 2016-08-13T12:08:56
 
   Scenario: Add a new account details in JSON format
     Given SQL table "account" has data

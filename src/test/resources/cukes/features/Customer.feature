@@ -4,7 +4,7 @@
 Feature: Add a new customer and get the customer details.
 
   Background:
-    Given current date is "2016-08-13T12:08:56.235-0600"
+    Given current date is 2016-08-13T12:08:56
 
   Scenario: Add a new customer details in JSON format
     Given ERP POST "/internal/erp/addCustomer" service returns success when JSON request matches the values

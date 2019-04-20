@@ -1,7 +1,6 @@
 package cukes.steps;
 
 import com.library.service.DateServiceImpl;
-import cucumber.api.Format;
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -9,10 +8,9 @@ import cucumber.api.java.en.Given;
 import cukes.stub.DateStubService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.TimeZone;
-
-import static cukes.stub.DateStubService.DEFAULT_DATE_FORMAT;
 
 public class CommonSteps extends BaseStepDefinition {
 
@@ -36,9 +34,9 @@ public class CommonSteps extends BaseStepDefinition {
          System.out.println("\n End: " + this.scenario.getName() + "\n");
     }
 
-    @Given("^current date is \"(.*?)\"$")
-    public void setupCurrentDate(@Format(DEFAULT_DATE_FORMAT) Date currentDate) {
-        dateService.setCurrentDate(currentDate);
+    @Given("current date is {date_iso_local_date_time}")
+    public void setupCurrentDate(LocalDateTime currentDate) {
+        dateService.setCurrentDate(java.util.Date.from(currentDate.atZone(ZoneId.systemDefault()).toInstant()));
     }
 
     @Given("^current date is today with timezone \"(.*?)\"$")

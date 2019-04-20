@@ -1,8 +1,8 @@
 package cukes.steps;
 
-import cucumber.api.DataTable;
 import cukes.helper.ContentTypeService;
 import cukes.type.ContentType;
+import io.cucumber.datatable.DataTable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;

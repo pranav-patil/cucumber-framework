@@ -8,11 +8,11 @@ import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 import com.mongodb.util.JSON;
-import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cukes.helper.FieldTypeService;
+import io.cucumber.datatable.DataTable;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -112,7 +112,7 @@ public class MongoSteps extends BaseStepDefinition {
         }
     }
 
-    @Given("^MongoDB sequence \"(.*?)\" has counter (\\d+)$")
+    @Given("MongoDB sequence {string} has counter {long}")
     public void setSequenceCounter(String sequenceName, Long startCounter) {
         Query query = new Query(Criteria.where("name").is(sequenceName));
         Update update = new Update().set("counter", startCounter);
