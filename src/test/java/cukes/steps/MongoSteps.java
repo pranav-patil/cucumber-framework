@@ -125,6 +125,7 @@ public class MongoSteps extends BaseStepDefinition {
 
     @Given("^insert a record into MongoDB collection \"(.*?)\" with the document")
     public void insertCollectionRecordsWithDocument$(String collection, String insertDocument) {
+        insertDocument = insertDocument.replaceAll("ISODate\\(\"(.+?)\"\\)", "{\"\\$date\" : \"$1\"}");
         MongoCollection<Document> dbCollection = mongoTemplate.getCollection(collection);
         Document insertObject = (Document) JSON.parse(insertDocument);
         dbCollection.insertOne(insertObject);

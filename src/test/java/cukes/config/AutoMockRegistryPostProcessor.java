@@ -104,7 +104,7 @@ public class AutoMockRegistryPostProcessor implements BeanDefinitionRegistryPost
 	 */
 	private Class<?> getClassFromMethodMetadata(final BeanDefinition beanDefinition) {
 		final Object source = beanDefinition.getSource();
-		if (source != null && StandardMethodMetadata.class.isInstance(source)) {
+		if (StandardMethodMetadata.class.isInstance(source)) {
 			final StandardMethodMetadata methodMetadata = StandardMethodMetadata.class.cast(source);
 			final Method introspectedMethod = methodMetadata.getIntrospectedMethod();
 			if (introspectedMethod != null) {
