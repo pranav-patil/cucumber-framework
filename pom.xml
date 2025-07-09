@@ -185,7 +185,7 @@
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>
 			<scope>compile</scope>
-			<version>1.3.3</version>
+			<version>1.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.dozer</groupId>
